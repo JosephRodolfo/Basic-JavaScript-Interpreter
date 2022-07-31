@@ -1,5 +1,4 @@
- 
-function test ("true", 9, false) { return x + 2;
-    }qq q q q qq 
+ function test(x, y, z) { return x + 2
+    }const=2;let=3qq q q q qq 
 
  
