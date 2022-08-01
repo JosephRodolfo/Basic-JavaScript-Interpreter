@@ -1,3 +1,10 @@
-functiontest(2,"y",1) {jjjjjjjj}function secondTest(2,"y",1) {aaaaaaaaaa}function thirdTest(2,"y",1) {jjjjjjjj}let testVar =2;const x=funk const y =3
+function test(2,"y",1) {
+    let x = 2;
+    function testFunction(a, b, c) {
+        return a + b + c;
+    };
+};
+function secondTest(2,"y",1) {aaaaaaaaaa};
+function thirdTest(2,"y",1) {jjjjjjjj};let testVar =2;const x=funk ;const y =3;
 
  

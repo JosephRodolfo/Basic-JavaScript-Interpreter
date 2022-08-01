@@ -1,8 +1,8 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::path::Path;
+mod helper_funcs;
+use helper_funcs::{find_start_end, read_file_line_by_line, skip_space, str_to_type};
 use substring::Substring;
-
+mod types;
+use types::VariableInitTypes::VariableInitTypes;
 use regex::Regex;
 
 #[derive(Debug, Clone)]
@@ -37,13 +37,8 @@ struct FunctionDeclaration {
     params: Params,
 }
 
-#[derive(Debug)]
 
-enum VariableInitTypes {
-    String(String),
-    Number(f64),
-    Array(Params),
-}
+
 
 #[derive(Debug)]
 struct VariableDeclaration {
@@ -52,7 +47,7 @@ struct VariableDeclaration {
     end: usize,
     identifier: Identifier,
     kind: String,
-    init: VariableInitTypes,
+    init: types::VariableInitTypes::VariableInitTypes,
 }
 #[derive(Debug)]
 struct ExpressionStatement {}
@@ -60,12 +55,25 @@ struct ExpressionStatement {}
 impl Program {
     //eventually the main parsing loop that will go through program string and turn it into AST and nodes, using
     //looping
-    fn parse_program(&mut self, program: &String, whole_program: &String) -> Option<usize> {
+    fn parse_program(
+        &mut self,
+        program: &String,
+        whole_program: &String,
+    ) -> Result<Option<usize>, String> {
         let mat = Regex::new("(function|const|let|if|for|console.log(\\(*)\\))")
             .unwrap()
-            .find(&program)
-            .expect("found no program");
-        let string_for_match = program.substring(mat.start(), mat.end());
+            .find(&program);
+
+        let match_find = match mat {
+            Some(x) => (x.start(), x.end()),
+            None => (0, 0),
+        };
+
+        if match_find == (0, 0) {
+            return Err("Out of things to parse in this item!".to_string());
+        }
+
+        let string_for_match = program.substring(match_find.0, match_find.1);
         let end_position = if string_for_match == "const" || string_for_match == "let" {
             let variable_declaration = Program::match_var_declaration_start_parse(
                 string_for_match,
@@ -98,7 +106,7 @@ impl Program {
         } else {
             None
         };
-        end_position
+        Ok(end_position)
         //This one will check for existing variables to determine if valid expression.
     }
     //These three match functions will take the already decided type (func_dec, var_dec, expression_statement and call parser functions, returning the node);
@@ -156,6 +164,7 @@ impl Program {
     }
 
     //I think this (and probably some other things) will be better outside of program later, possibly in a trait, since I'll use something similar for parsing function declaration and other statement blocks
+    //I also suspect these three can be a generic
     fn add_function_declaration(&mut self, data_to_add: FunctionDeclaration) {
         self.FunctionDeclaration.push(data_to_add);
     }
@@ -165,19 +174,11 @@ impl Program {
     fn add_expression_statement(&mut self, data_to_add: ExpressionStatement) {
         self.ExpressionStatement.push(data_to_add);
     }
-    fn loop_to_parse_program(&mut self, program_string: String) {
-        let mut mutable_program_string = program_string.clone();
+    fn loop_to_parse_program(&mut self, program_vec: Vec<String>) {
+        for i in 0..program_vec.len() {
+            let mut mutable_program_string = program_vec[i].clone();
 
-        while mutable_program_string.len() > 0 {
-            let result = Program::parse_program(self, &mutable_program_string, &program_string);
-
-            let new_start = match result {
-                Some(end_position) => end_position,
-                None => return,
-            };
-
-            mutable_program_string = copy_string(&mutable_program_string, new_start);
-            // println!("new string: {}", mutable_program_string)
+            let result = Program::parse_program(self, &mutable_program_string, &program_vec[i]);
         }
     }
 }
@@ -196,22 +197,17 @@ impl Default for Program {
 }
 fn main() {
     let file_string = read_file_line_by_line("src/test/test.txt");
+    let length = file_string.len();
+    let file_vec = string_array_to_vec(file_string);
 
-    let trimmed = skip_space(&file_string);
     let mut program = Program {
-        end: trimmed.len(),
+        end: length,
         ..Default::default()
     };
-
-    Program::loop_to_parse_program(&mut program, trimmed);
+    Program::loop_to_parse_program(&mut program, file_vec);
+    println!("{:#?}", program)
 }
 
-fn copy_string(string: &str, start: usize) -> String {
-    let new_program_string = string.clone().substring(start, string.len());
-
-    let result = new_program_string.to_string();
-    result
-}
 fn parse_variables(program: String, whole_program: &String) -> VariableDeclaration {
     let mat = Regex::new("(const|let)")
         .unwrap()
@@ -231,12 +227,8 @@ fn parse_variables(program: String, whole_program: &String) -> VariableDeclarati
     let end_current_var = find_next_statement_expression(&program, mat.end());
 
     let value = program.substring(after_equal.end(), end_current_var);
-    println!(
-        "{:?}, after equal: {}, end: {}",
-        value,
-        after_equal.end(),
-        end_current_var
-    );
+
+    let type_of_var = str_to_type(value).unwrap_or_default();
 
     //finds the end of the current variable declaration, by finding the start of the next statement or declaration;
     //if nothing comes after current variable declaration, returns 0, though I guess that would mean you could
@@ -273,7 +265,7 @@ fn parse_variables(program: String, whole_program: &String) -> VariableDeclarati
         end: end_current_var,
         kind: "let".to_string(), //placeholder
         identifier: new_var_declaration_identifier,
-        init: VariableInitTypes::Number(9.0), //placeholder
+        init: types::VariableInitTypes::VariableInitTypes::Number(9.0), //placeholder
     };
     new_var_declaration
 }
@@ -281,7 +273,7 @@ fn parse_variables(program: String, whole_program: &String) -> VariableDeclarati
 //parses function. right now takes whole program, starts at 0 and as far as I've gotten which is handling parameters, everything in the block should be reusable from main Program
 //returns FunctionDeclaration node.
 fn parse_functions(program: String) -> FunctionDeclaration {
-    let program = skip_space(&program);
+    let program = helper_funcs::skip_space(&program);
     //returns position everything after function
     let mat = Regex::new("(function)")
         .unwrap()
@@ -422,27 +414,45 @@ fn create_params_array_expression(string: &str, name: &str) -> Result<Params, St
 
     Ok(new_params)
 }
-//deletes whitespace
-fn skip_space(slice: &str) -> String {
-    slice.split_whitespace().collect()
-}
-//opens file, returns in string format
-fn read_file_line_by_line(filepath: &str) -> String {
-    let path = Path::new(filepath);
-    let file = File::open(path).expect("Cannot open file.txt");
-    let reader = BufReader::new(&file);
-    let lines = reader.lines().map(|l| l.expect("Couldn't read line"));
-    let string = lines.collect();
-    string
-}
 
-fn find_start_end(whole_program: &String, name_to_find: &str) -> (usize, usize) {
-    let formatted_name_to_find = format!("{}", name_to_find);
+//takes program string, converts it to array of statements. It skips what's inside blocks
+//that functinoality will be moved out to be used when parsing blocks;
+//I know the way I did it with chars causes issues I will need to address later, but I don't think they'll be a problem given the limited scope of this project.
+fn string_array_to_vec(string: String) -> Vec<String> {
+    let mut trimmed = skip_space(&string);
+    let mut new_string = trimmed.to_string();
 
-    let mat = Regex::new(&formatted_name_to_find)
-        .unwrap()
-        .find(&whole_program)
-        .expect("found no function");
+    let mut count: (i32, bool) = (0, false);
 
-    (mat.start(), mat.end())
+    let left_curly: &str = "{";
+    let right_curly: &str = "}";
+
+    let left_curly_char = left_curly.chars().next().unwrap();
+    let right_curly_char = right_curly.chars().next().unwrap();
+    let mut semicolon_matches_vec: Vec<usize> = Vec::new();
+
+    for (i, c) in trimmed.chars().enumerate() {
+        if c == left_curly_char {
+            count.0 = count.0 + 1;
+            count.1 = true;
+        }
+        if c == right_curly_char {
+            count.0 = count.0 - 1;
+        }
+
+        if count.0 == 0 {
+            count.1 = false;
+        }
+
+        if count.1 && c == ";".chars().next().unwrap() {
+            new_string.replace_range(i..i + 1, "~");
+            semicolon_matches_vec.push(i);
+        }
+    }
+    let result: Vec<String> = new_string
+        .split(";")
+        .map(|e| e.replace("~", ";").to_string())
+        .collect();
+
+    result
 }
