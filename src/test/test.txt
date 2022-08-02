@@ -5,6 +5,10 @@ function test(2,"y",1) {
     };
 };
 function secondTest(2,"y",1) {aaaaaaaaaa};
-function thirdTest(2,"y",1) {jjjjjjjj};let testVar =2;const x=funk ;const y =3;
+
+function thirdTest(2,"y",1) {jjjjjjjj};
+const x = 9;
+var z = "test";
+let test = 2;
 
  
