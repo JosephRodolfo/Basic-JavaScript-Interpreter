@@ -63,14 +63,14 @@ let string = str_to_type("x").unwrap();
     assert_eq!(string, "lookup");
 }
 
-
+//takes str value and determines the type; returns str of type for matching
 pub fn str_to_type(string: &str)->Result<&str, &str> {
     let start_bool = string.chars().next().unwrap_or_default() == '"';
         let end_bool = string.chars().last().unwrap_or_default() == '"';
         if start_bool && end_bool {
            return Ok("string");
         }
-
+        //logical xor, if input has one quotation mark on either side but not both, return malformed string error
         if (start_bool && !end_bool) || (!start_bool && end_bool) {
             return Err("Malformed string!");
         }
@@ -82,13 +82,59 @@ pub fn str_to_type(string: &str)->Result<&str, &str> {
             return Ok("bool");
         }
         else {
-
-
+            //if str input is none of these types, initiate a lookup of variables to determine if it's an existing variable;
             return Ok("lookup");
 
         }
         
 
     }
-
-
+//removes first and last chars from string 
+   pub fn rem_first_and_last(value: &str) -> &str {
+        let mut chars = value.chars();
+        chars.next();
+        chars.next_back();
+        chars.as_str()
+    }
+//takes program string, converts it to array of statements. It skips what's inside blocks
+//that functinoality will be moved out to be used when parsing blocks;
+//I know the way I did it with chars causes issues I will need to address later, but I don't think they'll be a problem given the limited scope of this project.
+   pub fn string_array_to_vec(string: String) -> Vec<String> {
+        let trimmed = skip_space(&string);
+        let mut new_string = trimmed.to_string();
+    
+        let mut count: (i32, bool) = (0, false);
+    
+        let left_curly: &str = "{";
+        let right_curly: &str = "}";
+    
+        let left_curly_char = left_curly.chars().next().unwrap();
+        let right_curly_char = right_curly.chars().next().unwrap();
+        let mut semicolon_matches_vec: Vec<usize> = Vec::new();
+    
+        for (i, c) in trimmed.chars().enumerate() {
+            if c == left_curly_char {
+                count.0 = count.0 + 1;
+                count.1 = true;
+            }
+            if c == right_curly_char {
+                count.0 = count.0 - 1;
+            }
+    
+            if count.0 == 0 {
+                count.1 = false;
+            }
+    
+            if count.1 && c == ";".chars().next().unwrap() {
+                new_string.replace_range(i..i + 1, "~");
+                semicolon_matches_vec.push(i);
+            }
+        }
+        let result: Vec<String> = new_string
+            .split(";")
+            .map(|e| e.replace("~", ";").to_string())
+            .collect();
+    
+        result
+    }
+    

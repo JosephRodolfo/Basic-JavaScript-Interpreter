@@ -1,12 +1,10 @@
-use std::env::VarError;
-
 use regex::Regex;
 use substring::Substring;
 use types::VariableInitTypes::VariableInitTypes;
 
 use crate::{
     helper_funcs::{self, find_start_end, str_to_type},
-    types, ExpressionStatement, FunctionDeclaration, Identifier, Params, VariableDeclaration,
+    types, ExpressionStatement, FunctionDeclaration, Identifier, Params, VariableDeclaration, BlockStatement, Body,
 };
 
 #[derive(Debug)]
@@ -27,7 +25,8 @@ impl Program {
         program: &String,
         whole_program: &String,
     ) -> Result<Option<usize>, String> {
-        let mat = Regex::new("(function|const|let|var|if|for|console.log(\\(*)\\))")
+        //this needs to be changed to match exact, beginning of string
+        let mat = Regex::new("(function|const|let|var|if|for|while|console.log(\\(*)\\))")
             .unwrap()
             .find(&program);
 
@@ -35,9 +34,12 @@ impl Program {
             Some(x) => (x.start(), x.end()),
             None => (0, 0),
         };
-
+        //if the first  of the program string doesn't match any of the reserved keywords, it checks to see if it's an expression. 
         if match_find == (0, 0) {
-            return Err("Out of things to parse in this item!".to_string());
+
+              let expression_statement = ExpressionStatement::check_expression_type(program);
+              
+            // return Err("Out of things to parse in this item!".to_string());
         }
 
         let string_for_match = program.substring(match_find.0, match_find.1);
@@ -66,12 +68,24 @@ impl Program {
             // println!("string: {}", result);
 
             Some(result)
-        } else if string_for_match == "if"
-            || string_for_match == "for"
-            || string_for_match == "console.log()"
+
+        }
+        //these three (and others probably) will be there own statements
+        else if string_for_match == "if"
+       
         {
             None
-        } else {
+        }
+        else if string_for_match == "for"
+       
+        {
+            None
+        } else if string_for_match == "while"
+       
+        {
+            None
+        }  
+        else {
             None
         };
         Ok(end_position)
@@ -174,15 +188,27 @@ impl Program {
         //be because using an enum for this wasn't the best choice to begin with.
         // let var_type = self.VariableDeclaration.iter().filter(|e| e.identifier.name == str_to_lookup).collect();
     }
+    //parse expressions, takes self, program (current string item in vector), and whole_program vector (which for now does nothing)
+    fn parse_expressions(&self, program: String, whole_program: &String)-> ExpressionStatement{
+        let mat = Regex::new("([<>]=?|=+|-|*|%|==|===|)")
+            .unwrap()
+            .find(&program)
+            .expect("No expressions found!");
+
+
+
+
+        unimplemented!()
+    }
 
     fn parse_variables(&self, program: String, whole_program: &String) -> VariableDeclaration {
         let mat = Regex::new("(const|let|var)")
             .unwrap()
             .find(&program)
             .expect("found no variables");
-
+        //returns keyword (let, const, var)
         let var_keyword = program.substring(mat.start(), mat.end());
-        println!("{}", var_keyword);
+        //returns match or everything after assignment operator
         let after_equal = Regex::new("(=)")
             .unwrap()
             .find(&program)
@@ -280,7 +306,7 @@ fn parse_functions(program: String) -> FunctionDeclaration {
         .unwrap()
         .find(&program)
         .expect("found no function");
-    //string of everything following function
+    //string of everything following function keyword
     let rest = program.substring(mat.end(), program.len());
 
     let func_length_match = Regex::new("(\\})").unwrap().find(&program).unwrap();
@@ -304,12 +330,24 @@ fn parse_functions(program: String) -> FunctionDeclaration {
         name: func_name.to_string(),
     };
 
+    let mut new_function_body = Body {
+        ..Default::default()
+    };
+
+    let new_block_statement = BlockStatement{
+        type_of: "BlockStatement".to_string(),
+        start: 0,
+        end: program.len(),
+        body: new_function_body
+    };
+
     let new_func = FunctionDeclaration {
         type_of: "FunctionDeclaration".to_string(),
         start: mat.start(),
         end: func_length_match.end(),
         params: params_arr,
         identifier: new_identifier,
+        body: new_block_statement
     };
     return new_func;
 }
@@ -395,7 +433,6 @@ fn create_params_array_expression(string: &str, name: &str) -> Result<Params, St
         let end_bool = first.chars().last().unwrap_or_default() == '"';
         if start_bool && end_bool {
             new_params.string.push(first.to_string());
-            // println!("{}", "string found")
         }
 
         if (start_bool && !end_bool) || (!start_bool && end_bool) {

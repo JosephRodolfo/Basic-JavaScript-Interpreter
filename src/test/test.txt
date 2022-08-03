@@ -4,6 +4,8 @@ function test(2,"y",1) {
         return a + b + c;
     };
 };
+test(2, 2, 2);
+2>2;
 function secondTest(2,"y",1) {aaaaaaaaaa};
 
 function thirdTest(2,"y",1) {jjjjjjjj};
