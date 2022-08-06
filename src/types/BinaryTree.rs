@@ -34,6 +34,9 @@ fn loop_through_operators(string: &str) -> BinaryExpression {
         right: BinaryExpressionOptions::None("placeholder".to_string()),
     };
 
+
+    
+
     let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
         .unwrap()
         .find(temp_string)
@@ -43,7 +46,6 @@ fn loop_through_operators(string: &str) -> BinaryExpression {
     let mut operator = temp_string.substring(mat.start(), mat.end());
     let mut next = temp_string.substring(mat.end(), temp_string.len());
     let type_of = self::str_to_type_inc_parentheses(current);
-    let left_right_vec = vec![current, next];
 
     let result = match type_of {
         "left_parens" => {
@@ -65,7 +67,7 @@ fn loop_through_operators(string: &str) -> BinaryExpression {
         }
         "literal" => {
             let new_literal = Literal {
-                type_of: "Identifier".to_string(),
+                type_of: "Literal".to_string(),
                 start: 0,
                 end: 0,
                 value: current.to_string(),
@@ -77,20 +79,22 @@ fn loop_through_operators(string: &str) -> BinaryExpression {
 
     new_binary_expression.left = result;
     new_binary_expression.operator = operator.to_string();
-
+// println!("{:?}", new_binary_expression);
     let temp_string = temp_string.substring(mat.end(), temp_string.len());
 
     let find_match = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
         .unwrap()
         .is_match(temp_string);
-    let binary_tree = if find_match {
-        let find_end = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-            .unwrap()
-            .find(temp_string)
-            .expect("no match foudn");
+        // println!("{:?}", find_match);
+
+    let binary_tree = if !find_match {
+        // let find_end = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+        //     .unwrap()
+        //     .find(temp_string)
+        //     .expect("no match foudn");
         new_binary_expression.right = self::create_node(
-            temp_string.substring(find_end.end(), temp_string.len()),
-            temp_string.substring(find_end.end(), temp_string.len()),
+            temp_string.substring(0, temp_string.len()),
+            next
         );
         new_binary_expression
     } else {
@@ -103,7 +107,9 @@ fn loop_through_operators(string: &str) -> BinaryExpression {
 }
 
 fn create_node(string: &str, current: &str) -> BinaryExpressionOptions {
-    let result = match current {
+    println!("string: {}, current: {}", string, current);
+    let type_of = str_to_type_inc_parentheses(current);
+    let result = match type_of {
         "left_parens" => {
             let new_string = string.substring(1, string.len());
             let result = loop_through_operators(new_string);
@@ -123,7 +129,7 @@ fn create_node(string: &str, current: &str) -> BinaryExpressionOptions {
         }
         "literal" => {
             let new_literal = Literal {
-                type_of: "Identifier".to_string(),
+                type_of: "Literal".to_string(),
                 start: 0,
                 end: 0,
                 value: current.to_string(),
@@ -162,29 +168,44 @@ fn str_to_type_inc_parentheses(string: &str) -> &str {
 
 
 #[test]
-fn test_create_binary_tree() {
-
+fn test_create_binary_tree_two_literals() {
     let new_literal = Literal {
-        type_of: "Identifier".to_string(),
+        type_of: "Literal".to_string(),
         start: 0,
         end: 0,
         value: "2".to_string(),
     };
-
     let literal = BinaryExpressionOptions::Literal(new_literal);
     let cloned_lit = literal.clone();
     let binary_expression_test = BinaryExpression {
         start: 0,
-        end: 5,
+        end: 3,
         type_of: "BinaryExpression".to_string(),
         left: literal,
         right: cloned_lit,
         operator: "+".to_string()
     };
-    
-
-
     assert_eq!(binary_expression_test, loop_through_operators("2+2"));
+}
+#[test]
+fn test_create_binary_tree_two_identifiers() {
+    let new_identifier = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "x".to_string(),
+    };
+    let identifier = BinaryExpressionOptions::Identifier(new_identifier);
+    let cloned_id = identifier.clone();
+    let binary_expression_test = BinaryExpression {
+        start: 0,
+        end: 3,
+        type_of: "BinaryExpression".to_string(),
+        left: identifier,
+        right: cloned_id,
+        operator: "+".to_string()
+    };
+    assert_eq!(binary_expression_test, loop_through_operators("x+x"));
 }
 
 
