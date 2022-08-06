@@ -217,7 +217,7 @@ impl Program {
         let name = program.substring(mat.end(), after_equal.start());
 
         //ignore this, completely broken post switching to using vecs vs. 1 long string, will revist.
-        let start_end_whole = find_start_end(whole_program, name);
+        let start_end_whole = find_start_end(whole_program.to_string(), name);
 
         //get var value, what follows assignment operator
         let value = program.substring(after_equal.end(), program.len());

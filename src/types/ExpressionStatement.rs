@@ -12,7 +12,13 @@ pub struct ExpressionStatement {
     expression: ExpressionType,
 }
 #[derive(PartialEq, Debug, Clone)]
-pub struct BinaryExpression {}
+pub struct BinaryExpression {
+    type_of: String,
+    start: usize,
+    end: usize,
+
+    
+}
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct CallExpression {
@@ -86,44 +92,59 @@ impl ExpressionStatement {
 
         Some("binary_expression")
     }
+
+    fn create_binary_expression(string: &str) {
+        fn loop_through_operators(string: &str) {
+            let mut counter = 0;
+            while counter == 0 {
+                let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+                    .unwrap()
+                    .find(&string)
+                    .expect("no operators found");
+
+                    let left = string.substring(0, mat.start());
+                    
+            }
+        }
+    }
+
     //creates a new call expression object
     fn create_call_expression(program: &str) -> CallExpression {
-//finds parentehses
+        //finds parentehses
         let call_expression_regex = "(\\(.*\\))$";
         let match_call_expression = Regex::new(&call_expression_regex)
             .unwrap()
             .find(program)
             .expect("not found");
         let function_name = program.substring(0, match_call_expression.start());
-//gets args str
+        //gets args str
         let params_str =
             program.substring(match_call_expression.start(), match_call_expression.end());
-//sorts args into literals and identifiers
+        //sorts args into literals and identifiers
         let sorted_tuple = Self::sort_identifier_literal(params_str);
-//creates call expression identifier
+        //creates call expression identifier
         let new_identifier = Identifier {
             start: 0,
             end: match_call_expression.end(),
             type_of: "Identifier".to_string(),
             name: function_name.to_string(),
         };
-//creates literals and identifiers vectors, Vec<Literal> or Vec<Identifier>
+        //creates literals and identifiers vectors, Vec<Literal> or Vec<Identifier>
         let identifiers_vec = Self::create_identifiers_vec(sorted_tuple.0);
-        let literals_vec  = Self::create_literals_vec(sorted_tuple.1);
-//creates call expression
-    let new_call_expression = CallExpression {
+        let literals_vec = Self::create_literals_vec(sorted_tuple.1);
+        //creates call expression
+        let new_call_expression = CallExpression {
             type_of: "CallExpression".to_string(),
             callee: new_identifier,
             start: 0,
             end: program.len(),
             args_literal: literals_vec,
-            args_identifier: identifiers_vec
+            args_identifier: identifiers_vec,
         };
-    //returns call expression argument
+        //returns call expression argument
         new_call_expression
     }
-    //takes string
-
+    //takes str, returns tuple of Strings, 0 representing literals, 1 representing identifiers
     fn sort_identifier_literal(string: &str) -> (Vec<String>, Vec<String>) {
         let args_count = string.matches(',').count() + 1;
         let mut vec_literals = Vec::new();
@@ -171,7 +192,7 @@ impl ExpressionStatement {
                 value: vec[i].to_string(),
             };
             literals_vec.push(new_literal);
-        };
+        }
         literals_vec
     }
     fn create_identifiers_vec(vec: Vec<String>) -> Vec<Identifier> {
@@ -187,9 +208,7 @@ impl ExpressionStatement {
         }
         identifier_vec
     }
-
 }
-
 
 #[test]
 fn test_create_identifiers_arrays() {
@@ -213,12 +232,12 @@ fn test_create_identifiers_arrays() {
             name: "z".to_string(),
         },
     ];
-    let string = ExpressionStatement::create_identifiers_vec(vec!["x", "y", "z"].iter().map(|e|e.to_string()).collect());
+    let string = ExpressionStatement::create_identifiers_vec(
+        vec!["x", "y", "z"].iter().map(|e| e.to_string()).collect(),
+    );
     assert_eq!(string, test_vec);
 }
 #[test]
-
-
 #[test]
 fn test_sort_identifier_literal() {
     let test_vec_literal = vec!["2"].into_iter().map(|e| e.to_string()).collect();
@@ -269,6 +288,11 @@ fn create_literals_vec() {
             value: "32".to_string(),
         },
     ];
-    let string = ExpressionStatement::create_literals_vec(vec!["\"x\"", "2", "32"].iter().map(|e|e.to_string()).collect());
+    let string = ExpressionStatement::create_literals_vec(
+        vec!["\"x\"", "2", "32"]
+            .iter()
+            .map(|e| e.to_string())
+            .collect(),
+    );
     assert_eq!(string, test_vec_literal);
 }

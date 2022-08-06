@@ -1,10 +1,9 @@
 
-
 #[derive(Debug, Clone, PartialEq)]
-pub struct Literal {
+pub struct Identifier {
+
     pub type_of: String,
     pub start: usize,
     pub end: usize,
-    pub value: String,
+    pub name: String,
 }
-

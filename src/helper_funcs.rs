@@ -8,7 +8,7 @@ pub fn skip_space(slice: &str) -> String {
     slice.split_whitespace().collect()
 }
 //takes string, and str to find, returns tuple containing start and end usize position
-pub fn find_start_end(whole_program: &String, name_to_find: &str) -> (usize, usize) {
+pub fn find_start_end(whole_program: String, name_to_find: &str) -> (usize, usize) {
     let formatted_name_to_find = format!("{}", name_to_find);
 
     let mat = Regex::new(&formatted_name_to_find)

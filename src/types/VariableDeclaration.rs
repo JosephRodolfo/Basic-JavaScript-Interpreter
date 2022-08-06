@@ -1,6 +1,4 @@
-use crate::{
-    types, Identifier
-};
+use crate::{types, Identifier};
 
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {

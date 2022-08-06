@@ -1,15 +1,8 @@
 mod helper_funcs;
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
 mod types;
-use types::{Program::Program, ExpressionStatement::ExpressionStatement, VariableDeclaration::VariableDeclaration};
-#[derive(Debug, Clone, PartialEq)]
-pub struct Identifier {
+use types::{Program::Program, ExpressionStatement::ExpressionStatement, VariableDeclaration::VariableDeclaration, Identifier::Identifier};
 
-    type_of: String,
-    start: usize,
-    end: usize,
-    name: String,
-}
 #[derive(Debug, Clone)]
 struct Params {
     number: Vec<f64>,
