@@ -1,4 +1,4 @@
-use std::arch::x86_64::_mm_stream_pd;
+use std::{arch::x86_64::_mm_stream_pd, result};
 
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
@@ -7,6 +7,8 @@ use crate::{
 use regex::Regex;
 use substring::Substring;
 use types::Literal::Literal;
+
+use super::ExpressionStatement;
 #[derive(PartialEq, Debug, Clone)]
 enum BinaryExpressionOptions {
     Literal(Literal),
@@ -25,158 +27,130 @@ pub struct BinaryExpression {
 }
 
 impl BinaryExpression {
-    fn loop_through_operators(string: &str) -> BinaryExpression {
-        let mut temp_string = string;
-        let mut new_binary_expression = BinaryExpression {
-            type_of: "BinaryExpression".to_string(),
-            start: 0,
-            end: temp_string.len(),
-            left: BinaryExpressionOptions::None("placeholder".to_string()),
-            operator: "".to_string(),
-            right: BinaryExpressionOptions::None("placeholder".to_string()),
-        };
-        let mut mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-            .unwrap()
-            .find(temp_string)
-            .expect("no operators found");
-
-        let current = temp_string.substring(0, mat.start());
-        let operator = temp_string.substring(mat.start(), mat.end());
-
-        let parens_present = BinaryExpression::check_for_parens(current);
-
-        let (left_result, mut temp_string) = if !parens_present {
-            let left_result = BinaryExpression::create_node(current);
-            (left_result, temp_string)
-        } else {
-            let find_right_parens = Regex::new("(\\))")
-                .unwrap()
-                .find(temp_string)
-                .expect("did not find right parenetheses");
-            let removed = temp_string.substring(0, find_right_parens.end());
-            let new_string = rem_first_and_last(removed);
-
-            let new_op_exists = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-                .unwrap()
-                .is_match(temp_string);
-
-            mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-                .unwrap()
-                .find(temp_string)
-                .expect("no operators found");
-            temp_string = temp_string.substring(mat.end(), temp_string.len());
-
-            (
-                BinaryExpressionOptions::BinaryExpression(Box::new(
-                    BinaryExpression::loop_through_operators(new_string),
-                )),
-                temp_string,
-            )
-        };
-
-        new_binary_expression.left = left_result;
-
-        new_binary_expression.operator = operator.to_string();
-
-        let text_for_next_op = temp_string.substring(mat.end(), temp_string.len());
-        let mut next_mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-            .unwrap()
-            .is_match(text_for_next_op);
-        println!("NEXT{}", next_mat);
-
-        let binary_tree = if !next_mat {
-            let next = text_for_next_op.substring(0, text_for_next_op.len());
-
-            new_binary_expression.right = BinaryExpression::create_node(next);
-            new_binary_expression
-        } else {
-            let parens_present = BinaryExpression::check_for_parens(current);
-
-            if parens_present {
-                let find_right_parens = Regex::new("(\\))")
-                    .unwrap()
-                    .find(temp_string)
-                    .expect("did not find right parenetheses");
-                let removed = temp_string.substring(0, find_right_parens.end());
-                let new_string = rem_first_and_last(removed);
-                let result = BinaryExpressionOptions::BinaryExpression(Box::new(
-                    BinaryExpression::create_node_binary(new_string),
-                ));
-                new_binary_expression.right = result;
-            } else {
-                temp_string = temp_string.substring(mat.end(), temp_string.len());
-                new_binary_expression.right = BinaryExpressionOptions::BinaryExpression(Box::new(
-                    BinaryExpression::create_node_binary(temp_string),
-                ));
-            }
-            new_binary_expression
-        };
-        binary_tree
-    }
-
-    fn create_node_binary(expression_string: &str) -> BinaryExpression {
-        let temp_string = if BinaryExpression::check_for_parens(expression_string) {
-            let result = rem_first_and_last(expression_string);
-
-            result
-        } else {
-            expression_string
-        };
-
-        let mut new_binary_expression = BinaryExpression {
-            type_of: "BinaryExpression".to_string(),
-            start: 0,
-            end: temp_string.len(),
-            left: BinaryExpressionOptions::None("placeholder".to_string()),
-            operator: "".to_string(),
-            right: BinaryExpressionOptions::None("placeholder".to_string()),
-        };
+    fn loop_through_operators(string: &str) -> (&str, Option<&str>, &str) {
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
             .unwrap()
-            .find(temp_string)
-            .expect("no operators found");
+            .find(string);
 
-        let current = temp_string.substring(0, mat.start());
-        let operator = temp_string.substring(mat.start(), mat.end());
-        let left_result = BinaryExpression::create_node(current);
 
-        new_binary_expression.left = left_result;
+        let left_paren = "(".chars().next().unwrap();
+        let c = string.chars().next().unwrap();
 
-        new_binary_expression.operator = operator.to_string();
-
-        let text_for_next_op = temp_string.substring(mat.end(), temp_string.len());
-        let next_mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
-            .unwrap()
-            .is_match(text_for_next_op);
-        println!("NEXT{}", next_mat);
-
-        let binary_tree = if !next_mat {
-            let next = text_for_next_op.substring(0, text_for_next_op.len());
-
-            new_binary_expression.right = BinaryExpression::create_node(next);
-            new_binary_expression
-        } else {
-            new_binary_expression.right = BinaryExpressionOptions::BinaryExpression(Box::new(
-                BinaryExpression::loop_through_operators(temp_string),
-            ));
-            new_binary_expression
+        let (mat_start, mat_end) = match mat {
+            Some(mat) => (mat.start(), mat.end()),
+            None => (0, 0),
         };
-        binary_tree
+
+        if mat_start == 0 && mat_end == 0 {
+            return (string, None, "");
+        }
+
+        let mut resultant = "";
+        let mut new_string = "";
+        let item = if left_paren == c {
+            let mut count: (i32, bool) = (0, false);
+
+            let left_curly: &str = "(";
+            let right_curly: &str = ")";
+
+            let left_curly_char = left_curly.chars().next().unwrap();
+            let right_curly_char = right_curly.chars().next().unwrap();
+
+            for (i, c) in string.chars().enumerate() {
+                if c == left_curly_char {
+                    count.0 = count.0 + 1;
+                    count.1 = true;
+                };
+                if c == right_curly_char {
+                    count.0 = count.0 - 1;
+                }
+
+                if count.0 == 0 {
+                    resultant = string.substring(0, i + 1);
+                    new_string = string.substring(i + 2, string.len());
+
+                    break;
+                }
+            }
+
+            let current = rem_first_and_last(resultant);
+            current
+        } else {
+            let current = string.substring(0, mat_start);
+            let  mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+                .unwrap()
+                .find(string)
+                .expect("no operators foudn");
+            new_string = string.substring(mat.end(), string.len());
+
+            current
+        };
+        if resultant == string {
+            return (rem_first_and_last(resultant), None, "");
+        }
+
+        let current = string.substring(0, mat_start);
+        let operator = string.substring(mat_start, mat_end);
+
+        (item, Some(operator), new_string)
+    }
+
+    fn create_binary_tree(string: &str) -> BinaryExpression {
+        let (current, operator, next) = BinaryExpression::loop_through_operators(string);
+
+        let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+            .unwrap()
+            .is_match(current);
+
+        let left_result = if mat {
+            let left_result = BinaryExpressionOptions::BinaryExpression(Box::new(
+                BinaryExpression::create_binary_tree(current),
+            ));
+            left_result
+        } else {
+            BinaryExpression::create_node(current)
+        };
+
+        let mut new_binary_expression = BinaryExpression {
+            type_of: "BinaryExpression".to_string(),
+            start: 0,
+            end: string.len(),
+            left: BinaryExpressionOptions::None("placeholder".to_string()),
+            operator: "".to_string(),
+            right: BinaryExpressionOptions::None("placeholder".to_string()),
+        };
+
+        let (test, test_op, test_string) = BinaryExpression::loop_through_operators(next);
+
+        if test_op == None {
+            new_binary_expression.left = left_result;
+
+            let right_result = if next.contains("(") {
+                BinaryExpressionOptions::BinaryExpression(Box::new(
+                    BinaryExpression::create_binary_tree(test),
+                ))
+            } else {
+                BinaryExpression::create_node(next)
+            };
+
+            new_binary_expression.right = right_result;
+            new_binary_expression.operator = operator.unwrap().to_string();
+
+            return new_binary_expression;
+        }
+
+        new_binary_expression.left = BinaryExpression::create_node(current);
+        new_binary_expression.right = BinaryExpressionOptions::BinaryExpression(Box::new(
+            BinaryExpression::create_binary_tree(next),
+        ));
+        new_binary_expression.operator = operator.unwrap().to_string();
+
+        new_binary_expression
     }
 
     fn create_node(current: &str) -> BinaryExpressionOptions {
         let type_of = BinaryExpression::str_to_type_inc_parentheses(current);
         let result = match type_of {
-            "left_parens" => {
-                let find_right_parens = Regex::new("(\\))")
-                    .unwrap()
-                    .find(current)
-                    .expect("did not find right parenetheses");
-                let new_string = rem_first_and_last(current);
-                let result = BinaryExpression::loop_through_operators(new_string);
-                BinaryExpressionOptions::BinaryExpression(Box::new(result))
-            }
-
             "identifier" => {
                 let new_identifier = Identifier {
                     type_of: "Identifier".to_string(),
@@ -219,7 +193,6 @@ impl BinaryExpression {
     }
 
     fn str_to_type_inc_parentheses(string: &str) -> &str {
-    
         let result = str_to_type(string);
 
         let type_match = match result {
@@ -268,11 +241,11 @@ fn test_create_binary_tree_three_items_parentheses_last() {
         right: BinaryExpressionOptions::BinaryExpression(Box::new(new_binary_expression)),
         operator: "+".to_string(),
     };
-    let printed = BinaryExpression::loop_through_operators("x+(z+y)+a+b+c");
-    println!("{:#?}", printed);
+    // let printed = BinaryExpression::create_binary_tree("x+(x+3)");
+    // println!("{:#?}", printed);
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::loop_through_operators("x+(x+3)")
+        BinaryExpression::create_binary_tree("x+(x+3)")
     );
 }
 
@@ -309,9 +282,11 @@ fn test_create_binary_tree_three_items_parentheses_first() {
         right: BinaryExpressionOptions::Literal(new_literal),
         operator: "+".to_string(),
     };
+    let printed = BinaryExpression::create_binary_tree("a+(b+(c+d))");
+    println!("{:#?}", printed);
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::loop_through_operators("(x+x)+3")
+        BinaryExpression::create_binary_tree("(x+x)+3")
     );
 }
 
@@ -352,7 +327,7 @@ fn test_create_binary_tree_three_items_mixed() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::loop_through_operators("x+x+3")
+        BinaryExpression::create_binary_tree("x+x+3")
     );
 }
 
@@ -376,7 +351,7 @@ fn test_create_binary_tree_two_literals() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::loop_through_operators("2+2")
+        BinaryExpression::create_binary_tree("2+2")
     );
 }
 #[test]
@@ -399,10 +374,9 @@ fn test_create_binary_tree_two_identifiers() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::loop_through_operators("x+x")
+        BinaryExpression::create_binary_tree("x+x")
     );
 }
-
 #[test]
 fn test_str_to_type_incuding_parens_string() {
     let string = BinaryExpression::str_to_type_inc_parentheses("\"dogs\"");
@@ -422,4 +396,40 @@ fn test_str_to_type_incuding_parens_identifier() {
 fn test_str_to_type_incuding_parens_malformed() {
     let string = BinaryExpression::str_to_type_inc_parentheses("\"de4+3");
     assert_eq!(string, "Malformed!");
+}
+
+#[test]
+fn test_loops_through_operator_two_simple() {
+    let string = BinaryExpression::loop_through_operators("x+x");
+    assert_eq!(string, ("x", Some("+"), "x"));
+}
+#[test]
+
+fn test_loops_through_operator_two_literal() {
+    let string = BinaryExpression::loop_through_operators("1+2");
+    assert_eq!(string, ("1", Some("+"), "2"));
+}
+#[test]
+
+fn test_loops_through_operator_reaches_end() {
+    let string = BinaryExpression::loop_through_operators("1");
+    assert_eq!(string, ("1", None, ""));
+}
+#[test]
+
+fn test_loops_through_operator_parens_end() {
+    let string = BinaryExpression::loop_through_operators("1+(x+2)");
+    assert_eq!(string, ("1", Some("+"), "(x+2)"));
+}
+#[test]
+
+fn test_loops_through_operator_parens_beginning() {
+    let string = BinaryExpression::loop_through_operators("(x+2)+2");
+    assert_eq!(string, ("x+2", Some("+"), "2"));
+}
+#[test]
+
+fn test_loops_through_operators_parens_string() {
+    let string = BinaryExpression::loop_through_operators("(x+2)");
+    assert_eq!(string, ("x+2", None, ""));
 }
