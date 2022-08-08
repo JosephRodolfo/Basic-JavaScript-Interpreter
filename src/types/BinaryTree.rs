@@ -1,5 +1,3 @@
-use std::{arch::x86_64::_mm_stream_pd, result};
-
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
     types, Identifier,
@@ -27,26 +25,33 @@ pub struct BinaryExpression {
 }
 
 impl BinaryExpression {
+    //takes expression full string, returns current item, operator, and entire string that follows operator
+    //there's a lot of room for in this function in particular; the mutable variables and them
+    //being changed in a loop/if statement that returns something else is bad.
     fn loop_through_operators(string: &str) -> (&str, Option<&str>, &str) {
+        //finds operator
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
             .unwrap()
             .find(string);
 
-
+        //gets ( as char, and first char of string
         let left_paren = "(".chars().next().unwrap();
         let c = string.chars().next().unwrap();
 
+        //if the operator find match returns None, returns (0, 0), elsewise returns (x, y) tuple of operator start end
         let (mat_start, mat_end) = match mat {
             Some(mat) => (mat.start(), mat.end()),
             None => (0, 0),
         };
-
+        //if there's no operator, returns early triple of string as current item (since it is the only, thus current, item) None for operator  and empty str for next;
         if mat_start == 0 && mat_end == 0 {
             return (string, None, "");
         }
 
         let mut resultant = "";
         let mut new_string = "";
+        //if the full string starts with ( char, it means this is a parenthetical.
+        //loops through full string until it finds matching char and returns item, so it doesn't end the return result at an inner parentheses;
         let item = if left_paren == c {
             let mut count: (i32, bool) = (0, false);
 
@@ -77,7 +82,7 @@ impl BinaryExpression {
             current
         } else {
             let current = string.substring(0, mat_start);
-            let  mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+            let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
                 .unwrap()
                 .find(string)
                 .expect("no operators foudn");
@@ -94,14 +99,14 @@ impl BinaryExpression {
 
         (item, Some(operator), new_string)
     }
-
+    //takes full binary expression string, returns  BinaryExpression object, supports theoretically infinite nested parenthetical statements
     fn create_binary_tree(string: &str) -> BinaryExpression {
         let (current, operator, next) = BinaryExpression::loop_through_operators(string);
 
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
             .unwrap()
             .is_match(current);
-
+        //sets left leaf, if a a parenthetical, recursively loops through it and returns binaryexpression object, else creates a node
         let left_result = if mat {
             let left_result = BinaryExpressionOptions::BinaryExpression(Box::new(
                 BinaryExpression::create_binary_tree(current),
@@ -119,26 +124,27 @@ impl BinaryExpression {
             operator: "".to_string(),
             right: BinaryExpressionOptions::None("placeholder".to_string()),
         };
-
-        let (test, test_op, test_string) = BinaryExpression::loop_through_operators(next);
-
+        //gets next set of current, operator, and following string, to see if the recursive loop needs to end after the final one
+        let (test, test_op, _test_string) = BinaryExpression::loop_through_operators(next);
+        //if the test operator from last line returns None, it's time to end recursive loop and return the binary_expression.
         if test_op == None {
             new_binary_expression.left = left_result;
-
+            //if the next item  is a parenthetical statement, starts a new loop using the test result, otherwise, just creates a node
             let right_result = if next.contains("(") {
                 BinaryExpressionOptions::BinaryExpression(Box::new(
                     BinaryExpression::create_binary_tree(test),
                 ))
+            //if it's not a parenthetical expression, just creates node with next
             } else {
                 BinaryExpression::create_node(next)
             };
 
             new_binary_expression.right = right_result;
             new_binary_expression.operator = operator.unwrap().to_string();
-
+            //returns early
             return new_binary_expression;
         }
-
+        // else if there is another operator, creates a node for left, and starts recursive loop off again for right.
         new_binary_expression.left = BinaryExpression::create_node(current);
         new_binary_expression.right = BinaryExpressionOptions::BinaryExpression(Box::new(
             BinaryExpression::create_binary_tree(next),
@@ -147,7 +153,7 @@ impl BinaryExpression {
 
         new_binary_expression
     }
-
+    //just takes string of current item, returns an enum BinaryExpressionOptions literal or identifier
     fn create_node(current: &str) -> BinaryExpressionOptions {
         let type_of = BinaryExpression::str_to_type_inc_parentheses(current);
         let result = match type_of {
@@ -174,7 +180,7 @@ impl BinaryExpression {
         };
         result
     }
-
+    //checks for parentheses in first character, if not returns false, else true;
     fn check_for_parens(string: &str) -> bool {
         let left_paren = "(".chars().next().unwrap();
         let c = string.chars().next();
@@ -282,11 +288,90 @@ fn test_create_binary_tree_three_items_parentheses_first() {
         right: BinaryExpressionOptions::Literal(new_literal),
         operator: "+".to_string(),
     };
-    let printed = BinaryExpression::create_binary_tree("a+(b+(c+d))");
+    let printed = BinaryExpression::create_binary_tree("a+(b+((c+d)+e))");
     println!("{:#?}", printed);
     assert_eq!(
         binary_expression_test,
         BinaryExpression::create_binary_tree("(x+x)+3")
+    );
+}
+
+#[test]
+
+fn test_create_binary_tree_nested_parentheses() {
+    let a = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "a".to_string(),
+    };
+    let b = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "b".to_string(),
+    };
+    let c = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "c".to_string(),
+    };
+    let d = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "d".to_string(),
+    };
+    let e = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "e".to_string(),
+    };
+    let c_d_binary_expression = BinaryExpression {
+        type_of: "BinaryExpression".to_string(),
+        start: 0,
+        end: 3,
+        left: BinaryExpressionOptions::Identifier(c),
+        operator: "+".to_string(),
+        right: BinaryExpressionOptions::Identifier(d),
+    };
+    let cd_e_binary_expression = BinaryExpression {
+        type_of: "BinaryExpression".to_string(),
+        start: 0,
+        end: 7,
+        left: BinaryExpressionOptions::BinaryExpression(Box::new(c_d_binary_expression)),
+        operator: "+".to_string(),
+        right: BinaryExpressionOptions::Identifier(e),
+    };
+
+    let b_cd_e_binary_expression = BinaryExpression {
+        type_of: "BinaryExpression".to_string(),
+        start: 0,
+        end: 11,
+        left: BinaryExpressionOptions::Identifier(b),
+        operator: "+".to_string(),
+        right: BinaryExpressionOptions::BinaryExpression(Box::new(cd_e_binary_expression)),
+    };
+
+    let a_b_cd_e_binary_expression = BinaryExpression {
+        type_of: "BinaryExpression".to_string(),
+        start: 0,
+        end: 15,
+        left: BinaryExpressionOptions::Identifier(a),
+        operator: "+".to_string(),
+        right: BinaryExpressionOptions::BinaryExpression(Box::new(b_cd_e_binary_expression)),
+    };
+
+
+
+
+
+
+    assert_eq!(
+        a_b_cd_e_binary_expression,
+        BinaryExpression::create_binary_tree("a+(b+((c+d)+e))")
     );
 }
 
