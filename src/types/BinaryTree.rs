@@ -100,7 +100,7 @@ impl BinaryExpression {
         (item, Some(operator), new_string)
     }
     //takes full binary expression string, returns  BinaryExpression object, supports theoretically infinite nested parenthetical statements
-    fn create_binary_tree(string: &str) -> BinaryExpression {
+   pub fn create_binary_tree(string: &str) -> BinaryExpression {
         let (current, operator, next) = BinaryExpression::loop_through_operators(string);
 
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")

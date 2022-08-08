@@ -7,6 +7,8 @@ use crate::{
     types, ExpressionStatement, FunctionDeclaration, Identifier, Params, VariableDeclaration, BlockStatement, Body,
 };
 
+use super::ExpressionStatement::CallExpression;
+
 #[derive(Debug)]
 pub struct Program {
     pub type_of: String,
@@ -36,11 +38,33 @@ impl Program {
         };
         //if the first  of the program string doesn't match any of the reserved keywords, it checks to see if it's an expression. 
         if match_find == (0, 0) {
-
               let expression_statement = ExpressionStatement::check_expression_type(program);
+              let result = match expression_statement {
+                Err(e)=> e,
+                Ok(result)=> result
+
+              };
+
+            }
               
+            
+        //       let parsed_expression_statement: ExpressionStatement = match result {
+
+
+
+
+        //         "call_expression"=>{ let result = ExpressionStatement::create_call_expression(program);},
+        //         "binary_expression"=>{let result = ExpressionStatement::create_binary_expression(program);}
+
+
+
+
+
+
+
+        //       }
             // return Err("Out of things to parse in this item!".to_string());
-        }
+        // }
 
         let string_for_match = program.substring(match_find.0, match_find.1);
         let end_position = if string_for_match == "const" || string_for_match == "let" || string_for_match == "var" {
