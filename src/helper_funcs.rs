@@ -138,3 +138,15 @@ pub fn str_to_type(string: &str)->Result<&str, &str> {
         result
     }
     
+   pub fn str_to_type_inc_parentheses(string: &str) -> &str {
+        let result = str_to_type(string);
+
+        let type_match = match result {
+            Ok("lookup") => "identifier",
+            Ok("bool") => "literal",
+            Ok("string") => "literal",
+            Ok("number") => "literal",
+            _ => "Malformed!",
+        };
+        type_match
+    }

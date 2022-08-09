@@ -33,7 +33,6 @@ impl BinaryExpression {
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
             .unwrap()
             .find(string);
-
         //gets ( as char, and first char of string
         let left_paren = "(".chars().next().unwrap();
         let c = string.chars().next().unwrap();
@@ -100,7 +99,7 @@ impl BinaryExpression {
         (item, Some(operator), new_string)
     }
     //takes full binary expression string, returns  BinaryExpression object, supports theoretically infinite nested parenthetical statements
-   pub fn create_binary_tree(string: &str) -> BinaryExpression {
+   pub fn create_generic_expression(string: &str) -> BinaryExpression {
         let (current, operator, next) = BinaryExpression::loop_through_operators(string);
 
         let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
@@ -109,7 +108,7 @@ impl BinaryExpression {
         //sets left leaf, if a a parenthetical, recursively loops through it and returns binaryexpression object, else creates a node
         let left_result = if mat {
             let left_result = BinaryExpressionOptions::BinaryExpression(Box::new(
-                BinaryExpression::create_binary_tree(current),
+                BinaryExpression::create_generic_expression(current),
             ));
             left_result
         } else {
@@ -132,7 +131,7 @@ impl BinaryExpression {
             //if the next item  is a parenthetical statement, starts a new loop using the test result, otherwise, just creates a node
             let right_result = if next.contains("(") {
                 BinaryExpressionOptions::BinaryExpression(Box::new(
-                    BinaryExpression::create_binary_tree(test),
+                    BinaryExpression::create_generic_expression(test),
                 ))
             //if it's not a parenthetical expression, just creates node with next
             } else {
@@ -147,7 +146,7 @@ impl BinaryExpression {
         // else if there is another operator, creates a node for left, and starts recursive loop off again for right.
         new_binary_expression.left = BinaryExpression::create_node(current);
         new_binary_expression.right = BinaryExpressionOptions::BinaryExpression(Box::new(
-            BinaryExpression::create_binary_tree(next),
+            BinaryExpression::create_generic_expression(next),
         ));
         new_binary_expression.operator = operator.unwrap().to_string();
 
@@ -251,7 +250,7 @@ fn test_create_binary_tree_three_items_parentheses_last() {
     // println!("{:#?}", printed);
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::create_binary_tree("x+(x+3)")
+        BinaryExpression::create_generic_expression("x+(x+3)")
     );
 }
 
@@ -288,11 +287,10 @@ fn test_create_binary_tree_three_items_parentheses_first() {
         right: BinaryExpressionOptions::Literal(new_literal),
         operator: "+".to_string(),
     };
-    let printed = BinaryExpression::create_binary_tree("a+(b+((c+d)+e))");
-    println!("{:#?}", printed);
+
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::create_binary_tree("(x+x)+3")
+        BinaryExpression::create_generic_expression("(x+x)+3")
     );
 }
 
@@ -371,7 +369,7 @@ fn test_create_binary_tree_nested_parentheses() {
 
     assert_eq!(
         a_b_cd_e_binary_expression,
-        BinaryExpression::create_binary_tree("a+(b+((c+d)+e))")
+        BinaryExpression::create_generic_expression("a+(b+((c+d)+e))")
     );
 }
 
@@ -412,7 +410,7 @@ fn test_create_binary_tree_three_items_mixed() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::create_binary_tree("x+x+3")
+        BinaryExpression::create_generic_expression("x+x+3")
     );
 }
 
@@ -436,7 +434,7 @@ fn test_create_binary_tree_two_literals() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::create_binary_tree("2+2")
+        BinaryExpression::create_generic_expression("2+2")
     );
 }
 #[test]
@@ -459,7 +457,7 @@ fn test_create_binary_tree_two_identifiers() {
     };
     assert_eq!(
         binary_expression_test,
-        BinaryExpression::create_binary_tree("x+x")
+        BinaryExpression::create_generic_expression("x+x")
     );
 }
 #[test]

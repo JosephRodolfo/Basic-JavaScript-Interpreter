@@ -1,33 +1,13 @@
 mod helper_funcs;
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
 mod types;
-use types::{Program::Program, ExpressionStatement::ExpressionStatement, VariableDeclaration::VariableDeclaration, Identifier::Identifier};
+use types::{Program::Program, ExpressionStatement::ExpressionStatement, FunctionDeclaration::FunctionDeclaration, VariableDeclaration::VariableDeclaration, Identifier::Identifier};
 
-#[derive(Debug, Clone)]
-struct Params {
-    number: Vec<f64>,
-    string: Vec<String>,
-    bool: Vec<bool>,
-}
+
+
 
 #[derive(Debug)]
-pub struct FunctionDeclaration {
-    type_of: String,
-    start: usize,
-    end: usize,
-    identifier: Identifier,
-    params: Params,
-    body: BlockStatement
-}
-#[derive(Debug)]
-pub struct BlockStatement {
-    type_of: String,
-    start: usize,
-    end: usize,
-    body: Body
-}
-#[derive(Debug)]
-struct Body {
+pub struct Body {
     FunctionDeclaration: Vec<FunctionDeclaration>,
     VariableDeclaration: Vec<VariableDeclaration>,
     ExpressionStatement: Vec<ExpressionStatement>,
@@ -56,6 +36,6 @@ fn main() {
         ..Default::default()
     };
     Program::loop_to_parse_program(&mut program, file_vec);
-    // println!("{:#?}", program)
+    println!("{:#?}", program)
 }
 
