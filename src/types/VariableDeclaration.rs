@@ -8,7 +8,7 @@ use crate::{
     types, Identifier,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
     pub type_of: String,
     pub start: usize,
@@ -16,7 +16,7 @@ pub struct VariableDeclaration {
     pub declarations: VariableDeclarator,
     pub kind: String,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclarator {
     type_of: String,
     start: usize,

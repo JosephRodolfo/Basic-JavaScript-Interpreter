@@ -1,6 +1,6 @@
 use crate::Body;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct BlockStatement {
     pub type_of: String,
     pub start: usize,

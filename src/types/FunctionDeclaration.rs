@@ -10,7 +10,7 @@ use crate::{
 
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct FunctionDeclaration {
     type_of: String,
     start: usize,
@@ -18,6 +18,10 @@ pub struct FunctionDeclaration {
     identifier: Identifier,
     params: Vec<Identifier>,
     body: BlockStatement
+}
+
+struct ReturnStatement {
+    
 }
 impl FunctionDeclaration{
 

@@ -146,7 +146,6 @@ fn test_create_identifiers_arrays() {
     assert_eq!(string, test_vec);
 }
 #[test]
-#[test]
 fn test_sort_identifier_literal() {
     let test_vec_literal = vec!["2"].into_iter().map(|e| e.to_string()).collect();
     let test_vec_identifier: Vec<String> = vec!["z"].into_iter().map(|e| e.to_string()).collect();

@@ -1,12 +1,13 @@
 mod helper_funcs;
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
 mod types;
+mod traits;
 use types::{Program::Program, ExpressionStatement::ExpressionStatement, FunctionDeclaration::FunctionDeclaration, VariableDeclaration::VariableDeclaration, Identifier::Identifier};
 
 
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Body {
     FunctionDeclaration: Vec<FunctionDeclaration>,
     VariableDeclaration: Vec<VariableDeclaration>,

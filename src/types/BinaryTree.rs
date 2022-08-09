@@ -6,7 +6,6 @@ use regex::Regex;
 use substring::Substring;
 use types::Literal::Literal;
 
-use super::ExpressionStatement;
 #[derive(PartialEq, Debug, Clone)]
 enum BinaryExpressionOptions {
     Literal(Literal),
@@ -93,7 +92,7 @@ impl BinaryExpression {
             return (rem_first_and_last(resultant), None, "");
         }
 
-        let current = string.substring(0, mat_start);
+        // let current = string.substring(0, mat_start);
         let operator = string.substring(mat_start, mat_end);
 
         (item, Some(operator), new_string)
@@ -180,22 +179,22 @@ impl BinaryExpression {
         result
     }
     //checks for parentheses in first character, if not returns false, else true;
-    fn check_for_parens(string: &str) -> bool {
-        let left_paren = "(".chars().next().unwrap();
-        let c = string.chars().next();
+    // fn check_for_parens(string: &str) -> bool {
+    //     let left_paren = "(".chars().next().unwrap();
+    //     let c = string.chars().next();
 
-        let result = match c {
-            Some(c) => {
-                if c == left_paren {
-                    true
-                } else {
-                    false
-                }
-            }
-            None => false,
-        };
-        result
-    }
+    //     let result = match c {
+    //         Some(c) => {
+    //             if c == left_paren {
+    //                 true
+    //             } else {
+    //                 false
+    //             }
+    //         }
+    //         None => false,
+    //     };
+    //     result
+    // }
 
     fn str_to_type_inc_parentheses(string: &str) -> &str {
         let result = str_to_type(string);
@@ -459,6 +458,18 @@ fn test_create_binary_tree_two_identifiers() {
         binary_expression_test,
         BinaryExpression::create_generic_expression("x+x")
     );
+}
+
+#[test]
+fn test_create_binary_expression_one_arg() {
+    let new_identifier = Identifier {
+        type_of: "Identifier".to_string(),
+        start: 0,
+        end: 0,
+        name: "x".to_string(),
+    };
+    let string = BinaryExpression::create_node("x");
+    assert_eq!(string, BinaryExpressionOptions::Identifier(new_identifier));
 }
 #[test]
 fn test_str_to_type_incuding_parens_string() {

@@ -1,10 +1,10 @@
 use regex::Regex;
 use substring::Substring;
 use types::VariableInitTypes::VariableInitTypes;
+use crate::traits::ExpressionTypes::ExpressionTypes;
 
 use crate::{
-    helper_funcs::{self, find_start_end, str_to_type},
-    types, Body, ExpressionStatement, FunctionDeclaration, Identifier, VariableDeclaration,
+    types, ExpressionStatement, FunctionDeclaration, Identifier, VariableDeclaration,
 };
 
 #[derive(Debug)]
@@ -12,9 +12,17 @@ pub struct Program {
     pub type_of: String,
     pub start: usize,
     pub end: usize,
+    // pub body: Vec<BodyTypes>,
     pub VariableDeclaration: Vec<VariableDeclaration>,
     pub FunctionDeclaration: Vec<FunctionDeclaration>,
     pub ExpressionStatement: Vec<ExpressionStatement>,
+}
+//I'm not sure if this is a better way to handle the body. 
+#[derive(Debug)]
+enum BodyTypes{
+    VariableDeclaration(VariableDeclaration),
+    FunctionDeclaration(FunctionDeclaration),
+    ExpressionStatement(ExpressionStatement)
 }
 
 impl Program {
@@ -26,7 +34,7 @@ impl Program {
         whole_program: &String,
     ) -> Result<Option<usize>, String> {
         //this needs to be changed to match exact, beginning of string
-        let mat = Regex::new("(function|const|let|var|if|for|while|console.log(\\(*)\\))")
+        let mat = Regex::new("(function|const|let|var|if(|for|while|console.log(\\(*)\\))")
             .unwrap()
             .find(&program);
 
@@ -76,12 +84,11 @@ impl Program {
             .unwrap();
 
             self.add_function_declaration(function_declaration);
-            // println!("string: {}", result);
 
             None
         }
-        //these three (and others probably) will be there own statements
-        else if string_for_match == "if" {
+        else if string_for_match == "if(" {
+
             None
         } else if string_for_match == "for" {
             None
@@ -135,25 +142,7 @@ impl Program {
         function_declaration
     }
 
-    // fn match_expression_statement_start_parse(
-    //     type_of_string_for_match: &str,
-    //     program_string: String,
-    // ) {
-    //     match type_of_string_for_match {
-    //         "if" => {
-    //             let function = parse_functions(program_string);
-    //         }
-    //         "for" => {
-    //             let function = parse_functions(program_string);
-    //         }
-    //         "console.log" => {
-    //             let function = parse_functions(program_string);
-    //         }
-    //         _ => {
-    //             // println!("{}", "NO EXPRESSION FOUND!");
-    //         }
-    //     }
-    // }
+
 
     //I think this (and probably some other things) will be better outside of program later, possibly in a trait, since I'll use something similar for parsing function declaration and other statement blocks
     //I also suspect these three can be a generic
@@ -174,34 +163,7 @@ impl Program {
         }
     }
 
-    // pub fn lookup_var(&self, str_to_lookup: &str) -> Result<Option<VariableInitTypes>, String> {
-    //     let mut test_vec: Vec<VariableInitTypes> = Vec::new();
-    //     for i in 0..self.VariableDeclaration.len() {
-    //         if self.VariableDeclaration[i]::Identifier.name == str_to_lookup {
-    //             let found = self.VariableDeclaration[i].init.clone();
-    //             test_vec.push(found)
-    //         }
-    //     }
-
-    //     if test_vec.len() == 0 {
-    //         let none_found = Err("No variable with that name found!".to_string());
-    //         return none_found;
-    //     }
-    //     Ok(Some(test_vec[0].clone()))
-
-    //     //I couldn't figure out how to implement FromIter trait on VariableInitTypes to be able to use collect() due to not knowing the field in advance. I suspect unfortunately it may
-    //     //be because using an enum for this wasn't the best choice to begin with.
-    //     // let var_type = self.VariableDeclaration.iter().filter(|e| e.identifier.name == str_to_lookup).collect();
-    // }
-    //parse expressions, takes self, program (current string item in vector), and whole_program vector (which for now does nothing)
-    // fn parse_expressions(&self, program: String, whole_program: &String) -> ExpressionStatement {
-    //     let mat = Regex::new("([<>]=?|=+|-|*|%|==|===|)")
-    //         .unwrap()
-    //         .find(&program)
-    //         .expect("No expressions found!");
-
-    //     unimplemented!()
-    // }
+  
 }
 
 impl Default for Program {
