@@ -1,29 +1,23 @@
 use regex::Regex;
 use substring::Substring;
-use types::VariableInitTypes::VariableInitTypes;
 use crate::traits::ExpressionTypes::ExpressionTypes;
+use crate::types;
+use types::{BodyTypes::BodyTypes, IfStatement::IfStatement, ReturnStatement::ReturnStatement };
 
 use crate::{
-    types, ExpressionStatement, FunctionDeclaration, Identifier, VariableDeclaration,
+    ExpressionStatement, FunctionDeclaration, VariableDeclaration
 };
+
+
 
 #[derive(Debug)]
 pub struct Program {
     pub type_of: String,
     pub start: usize,
     pub end: usize,
-    // pub body: Vec<BodyTypes>,
-    pub VariableDeclaration: Vec<VariableDeclaration>,
-    pub FunctionDeclaration: Vec<FunctionDeclaration>,
-    pub ExpressionStatement: Vec<ExpressionStatement>,
+    pub body: Vec<BodyTypes>,
 }
-//I'm not sure if this is a better way to handle the body. 
-#[derive(Debug)]
-enum BodyTypes{
-    VariableDeclaration(VariableDeclaration),
-    FunctionDeclaration(FunctionDeclaration),
-    ExpressionStatement(ExpressionStatement)
-}
+
 
 impl Program {
     //eventually the main parsing loop that will go through program string and turn it into AST and nodes, using
@@ -32,9 +26,13 @@ impl Program {
         &mut self,
         program: &String,
         whole_program: &String,
-    ) -> Result<Option<usize>, String> {
-        //this needs to be changed to match exact, beginning of string
-        let mat = Regex::new("(function|const|let|var|if(|for|while|console.log(\\(*)\\))")
+    )  {
+                self.type_of ="test".to_string();
+
+        //this needs to be changed to match exact, beginning of string,
+        //also needs conditional logic for block statement vs. whole program, 
+        //as return statements shouldn't be in main program
+        let mat = Regex::new("(function|return|const|let|var|if|for|while|console.log(\\(*)\\))")
             .unwrap()
             .find(&program);
 
@@ -54,9 +52,8 @@ impl Program {
                 "call_expression" => ExpressionStatement::create_call_expression(program),
                 _ => ExpressionStatement::create_binary_expression(program),
             };
-
-            self.add_expression_statement(parsed_expression_statement);
-            return Err("Out of things to parse in this item!".to_string());
+            self.self_add_body_types(BodyTypes::ExpressionStatement(parsed_expression_statement));
+            // self.add_expression_statement(parsed_expression_statement);
         }
 
         let string_for_match = program.substring(match_find.0, match_find.1);
@@ -72,8 +69,9 @@ impl Program {
             )
             .unwrap();
             let result = variable_declaration.end;
+            self.self_add_body_types(BodyTypes::VariableDeclaration(variable_declaration));
 
-            self.add_variable_declaration(variable_declaration);
+            // self.add_variable_declaration(variable_declaration);
 
             Some(result)
         } else if string_for_match == "function" {
@@ -83,21 +81,29 @@ impl Program {
             )
             .unwrap();
 
-            self.add_function_declaration(function_declaration);
+            self.self_add_body_types(BodyTypes::FunctionDeclaration(function_declaration));
 
             None
         }
-        else if string_for_match == "if(" {
+        else if string_for_match == "if" {
+
+         let new_if_statement =  IfStatement::create_if_statement(program);
+         self.self_add_body_types(BodyTypes::IfStatement(new_if_statement));
+
+         None
+        }   else if string_for_match == "return" {
+            let new_if_statement =  ReturnStatement::create_return_statement(program);
+            self.self_add_body_types(BodyTypes::ReturnStatement(new_if_statement));
+
 
             None
-        } else if string_for_match == "for" {
+        }  else if string_for_match == "for" {
             None
         } else if string_for_match == "while" {
             None
         } else {
             None
         };
-        Ok(end_position)
         //This one will check for existing variables to determine if valid expression.
     }
     //These three match functions will take the already decided type (func_dec, var_dec, expression_statement and call parser functions, returning the node);
@@ -146,20 +152,15 @@ impl Program {
 
     //I think this (and probably some other things) will be better outside of program later, possibly in a trait, since I'll use something similar for parsing function declaration and other statement blocks
     //I also suspect these three can be a generic
-    fn add_function_declaration(&mut self, data_to_add: FunctionDeclaration) {
-        self.FunctionDeclaration.push(data_to_add);
-    }
-    fn add_variable_declaration(&mut self, data_to_add: VariableDeclaration) {
-        self.VariableDeclaration.push(data_to_add);
-    }
-    fn add_expression_statement(&mut self, data_to_add: ExpressionStatement) {
-        self.ExpressionStatement.push(data_to_add);
+
+    fn self_add_body_types(&mut self, data_to_add: BodyTypes) {
+        self.body.push(data_to_add);
     }
     pub fn loop_to_parse_program(&mut self, program_vec: Vec<String>) {
         for i in 0..program_vec.len() - 1 {
             let mutable_program_string = program_vec[i].clone();
 
-            let result = Program::parse_program(self, &mutable_program_string, &program_vec[i]);
+          self.parse_program(&mutable_program_string, &program_vec[i]);
         }
     }
 
@@ -172,13 +173,10 @@ impl Default for Program {
             type_of: "Program".to_string(),
             start: 0,
             end: 0,
-            VariableDeclaration: Vec::new(),
-            FunctionDeclaration: Vec::new(),
-            ExpressionStatement: Vec::new(),
+            body: Vec::new()
         }
     }
 }
 
-//parses function. right now takes whole program, starts at 0 and as far as I've gotten which is handling parameters, everything in the block should be reusable from main Program
-//returns FunctionDeclaration node.
+
 

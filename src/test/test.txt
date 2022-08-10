@@ -1,9 +1,3 @@
-const y ="test";
-let x = 2;
-function testFunc(x, y, z) {
-    return x + y + z;
-};
 
-testFunc(1, 3, 3);
 
- 
+const array = [1, a, z];

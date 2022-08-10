@@ -1,10 +1,13 @@
 use regex::Regex;
 use substring::Substring;
-use types::Literal::Literal;
-use crate::helper_funcs::str_to_type_inc_parentheses;
+use crate::helper_funcs::rem_first_and_last;
+use crate::traits::CommaSeperatedList::CommaSeperatedList;
 use crate::types::BlockStatement::BlockStatement;
+use crate::types::BodyTypes::BodyTypes;
+use crate::types::Identifier::Identifier;
+
 use crate::{
-    types, Identifier, helper_funcs, Body,
+    helper_funcs
 };
 
 
@@ -20,23 +23,7 @@ pub struct FunctionDeclaration {
     body: BlockStatement
 }
 
-struct ReturnStatement {
-    
-}
 impl FunctionDeclaration{
-
-    fn check_function_type(
-        type_of_string_for_match: &str,
-        program_string: String,
-    ) -> Result<&str, &str> {
-        let function_declaration: Result<&str, &str> =
-            match type_of_string_for_match {
-                "function" =>   Ok("function"),
-                
-                _ => panic!("Problem with variable declaration!"),
-            };
-        function_declaration
-    }
 
     
     pub fn create_function_declaration(program: String) -> FunctionDeclaration {
@@ -61,7 +48,8 @@ impl FunctionDeclaration{
         //string of params
         let rest_params = rest.substring(match_params.start() + 1, match_params.end() - 1);
     
-        let params_arr = FunctionDeclaration::create_params_array_declaration(rest_params).unwrap();
+        let params_string_arr = FunctionDeclaration::create_string_vec(rest_params);
+        let params_arr = FunctionDeclaration::create_comma_seperated_array(params_string_arr).unwrap();
     
         let new_identifier = Identifier {
             type_of: "Identifier".to_string(),
@@ -69,17 +57,11 @@ impl FunctionDeclaration{
             end: match_params.end(),
             name: func_name.to_string(),
         };
-    
-        let mut new_function_body = Body {
-            ..Default::default()
-        };
-    
-        let new_block_statement = BlockStatement {
-            type_of: "BlockStatement".to_string(),
-            start: 0,
-            end: program.len(),
-            body: new_function_body,
-        };
+        let block_statement_string = rest.substring(match_params.end(), program.len());
+        println!("block statement string: {:?}", rem_first_and_last(block_statement_string));
+
+        let new_block_statement = BlockStatement::create_block_statement(block_statement_string);
+
     
         let new_func = FunctionDeclaration {
             type_of: "FunctionDeclaration".to_string(),
@@ -87,58 +69,35 @@ impl FunctionDeclaration{
             end: func_length_match.end(),
             params: params_arr,
             identifier: new_identifier,
-            body: new_block_statement,
+            body: new_block_statement
         };
         return new_func;
     }
 
-    fn create_params_array_declaration(string: &str) -> Result<Vec<Identifier>, String> {
-        let args_count = string.matches(',').count() + 1;
-    
-           let mut params_vec: Vec<Identifier>=Vec::new();
-        
-        let mut temp_string = string;
-        for i in 0..args_count {
-            let formatted = format!("{})", temp_string);
-    
-            let match_params = if i == args_count - 1 {
-                let x = format!("{}", "(^*$)");
-                let match_return = Regex::new(&x).unwrap().find(&formatted).expect("not found");
-                match_return
-            } else {
-                let x = format!("{}", "(,)");
-                let match_return = Regex::new(&x)
-                    .unwrap()
-                    .find(&temp_string)
-                    .expect("not found");
-                match_return
-            };
-    
-            let first = temp_string.substring(0, match_params.end() - 1);
-            
-            let param = str_to_type_inc_parentheses(first);
-          
-            match param {
-            "identifier"=>{
-                
-                let new_param = Identifier {
-                    type_of:"Identifier".to_string(),
-                    start:0,
-                    end:0,
-                    name: first.to_string()
-                };
-                params_vec.push(new_param)},
-            _=>{panic!("Param malformed!")}
-            }
-            temp_string = temp_string.substring(match_params.end(), temp_string.len() + 1);
-    
-        }
-    
-        Ok(params_vec)
-    }
+   
+      
+ 
 
 }
 
+impl CommaSeperatedList<Identifier> for FunctionDeclaration {
+    fn create_comma_seperated_array(string_vec: Vec<&str>) -> Result<Vec<Identifier>, String> {
+        let result = string_vec
+            .iter()
+            .map(|e| {
+                let new_identifier = Identifier {
+                    name: e.to_string(),
+                    start: 0,
+                    end: 0,
+                    type_of: "Identifier".to_string(),
+                };
+                new_identifier
+            })
+            .collect::<Vec<Identifier>>();
+
+        Ok(result)
+    }
+}
 
 
 

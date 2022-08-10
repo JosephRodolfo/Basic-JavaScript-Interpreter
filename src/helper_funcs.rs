@@ -67,6 +67,12 @@ let string = str_to_type("x").unwrap();
 pub fn str_to_type(string: &str)->Result<&str, &str> {
     let start_bool = string.chars().next().unwrap_or_default() == '"';
         let end_bool = string.chars().last().unwrap_or_default() == '"';
+        let array_expression_regex = "^\\[.*\\]$";
+        let match_array_expression = Regex::new(&array_expression_regex).unwrap().is_match(string);
+        if match_array_expression {
+            return Ok("array_expression");
+        }
+        
         if start_bool && end_bool {
            return Ok("string");
         }
@@ -146,6 +152,7 @@ pub fn str_to_type(string: &str)->Result<&str, &str> {
             Ok("bool") => "literal",
             Ok("string") => "literal",
             Ok("number") => "literal",
+            Ok("array_expression") =>"array_expression",
             _ => "Malformed!",
         };
         type_match

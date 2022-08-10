@@ -3,14 +3,56 @@ use crate::types;
 use types::BinaryTree::BinaryExpression;
 use types::CallExpression::CallExpression;
 use types::ExpressionType::ExpressionType;
-
-
+use types::Identifier::Identifier;
+use types::Literal::Literal;
+use types::ArrayExpression::ArrayExpression;
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExpressionStatement {
     type_of: String,
     start: usize,
     end: usize,
     expression: ExpressionType,
+}
+
+impl ExpressionStatement {
+   pub fn create_expression_statement(
+        type_of_test: Result<&str, &str>,
+        expression_string: &str,
+    ) -> ExpressionType {
+        let expression: ExpressionType = match type_of_test {
+            Ok("call_expression") => ExpressionType::CallExpression(
+                CallExpression::create_generic_expression(expression_string),
+            ),
+            Ok("binary_expression") => ExpressionType::BinaryExpression(
+                BinaryExpression::create_generic_expression(expression_string),
+            ),
+            Ok("array_expression") => ExpressionType::ArrayExpression(
+                ArrayExpression::create_array_expression(expression_string),
+            ),
+            Ok("literal") => {
+                let new_literal = Literal {
+                    type_of: "Literal".to_string(),
+                    start: 0,
+                    end: 0,
+                    value: expression_string.to_string(),
+                };
+                ExpressionType::Literal(new_literal)
+            }
+            Ok("identifier") => {
+                let new_identifier = Identifier {
+                    type_of: "Identifier".to_string(),
+                    start: 0,
+                    end: 0,
+                    name: expression_string.to_string(),
+                };
+                ExpressionType::Identifier(new_identifier)
+            }
+            _ => {
+                panic!("Error",)
+            }
+        };
+        expression
+    }
 }
 
 #[test]
@@ -51,9 +93,6 @@ fn test_check_if_valid_expression_literal() {
 }
 
 impl ExpressionStatement {
- 
- 
-
     pub fn create_binary_expression(string: &str) -> ExpressionStatement {
         let result = BinaryExpression::create_generic_expression(string);
         let new_expression_statement = ExpressionStatement {

@@ -1,6 +1,6 @@
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
-    types,
+    types, traits::CommaSeperatedList::CommaSeperatedList,
 };
 use regex::Regex;
 use substring::Substring;
@@ -118,6 +118,11 @@ impl CallExpression {
         identifier_vec
     }
 }
+
+// impl CommaSeperatedList for CallExpression{}
+
+    
+
 #[test]
 fn test_create_identifiers_arrays() {
     let test_vec: Vec<Identifier> = vec![

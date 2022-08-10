@@ -1,10 +1,11 @@
 use regex::Regex;
 use substring::Substring;
+use types::ArrayExpression::ArrayExpression;
 use types::Literal::Literal;
 use types::VariableInitTypes::VariableInitTypes;
 
 use crate::{
-    helper_funcs::{str_to_type_inc_parentheses},
+    helper_funcs::{rem_first_and_last, str_to_type_inc_parentheses},
     types, Identifier,
 };
 
@@ -44,7 +45,6 @@ impl VariableDeclaration {
         //get var name
         let name = program.substring(mat.end(), after_equal.start());
 
-
         //get var value, what follows assignment operator
         let value = program.substring(after_equal.end(), program.len());
         //returns str of type of var ("number", "bool", etc., takes value as param(or what's after assignment operator))
@@ -69,6 +69,12 @@ impl VariableDeclaration {
                     value: value.to_string(),
                 };
                 Ok(VariableInitTypes::Literal(new_var_declaration_literal))
+            }
+            "array_expression" => {
+                let square_brackets_removed = rem_first_and_last(value);
+                Ok(VariableInitTypes::ArrayExpression(
+                    ArrayExpression::create_array_expression(square_brackets_removed),
+                ))
             }
             _ => panic!("Problem with variable declaration!"),
         };
