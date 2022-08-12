@@ -1,3 +1,4 @@
+let x = 2;
 
-
-const array = [1, a, z];
+const y = "test";
+var z = [3,3,3];

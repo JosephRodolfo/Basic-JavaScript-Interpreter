@@ -1,10 +1,10 @@
 use regex::Regex;
 use substring::Substring;
 
-
+//a trait for handling lists seperated by something like commas, using generics and lifetimes
 pub trait CommaSeperatedList<T> {
-    fn create_string_vec(string: &str) -> Vec<&str> {
-        let args_count = string.matches(',').count() + 1;
+    fn create_string_vec<'a>(string: &'a str, character: &str) -> Vec<&'a str> {
+        let args_count = string.matches(character).count() + 1;
 
         let mut string_vec: Vec<&str> = Vec::new();
 
@@ -17,7 +17,7 @@ pub trait CommaSeperatedList<T> {
                 let match_return = Regex::new(&x).unwrap().find(&formatted).expect("not found");
                 match_return
             } else {
-                let x = format!("{}", "(,)");
+                let x = format!("({})", character);
                 let match_return = Regex::new(&x)
                     .unwrap()
                     .find(&temp_string)

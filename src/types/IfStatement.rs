@@ -1,12 +1,11 @@
 use crate::helper_funcs::rem_first_and_last;
 use crate::traits::ExpressionTypes::ExpressionTypes;
-use crate::{types};
+use crate::types;
 use core::panic;
 use regex::Regex;
 use substring::Substring;
 use types::ExpressionStatement::ExpressionStatement;
 use types::BlockStatement::BlockStatement;
-use types::Literal::Literal;
 use types::ExpressionType::ExpressionType;
 #[derive(PartialEq, Debug)]
 pub struct IfStatement {
@@ -21,8 +20,6 @@ pub struct IfStatement {
 impl IfStatement {
     //should be taking str confirmed to start with "if("
     pub fn create_if_statement(string: &str) -> IfStatement {
-        println!("{}", string);
-
         let mat = Regex::new("^(if\\(.*\\))").unwrap().is_match(string);
         if !mat {
             panic!("Malformed if statement!")
@@ -60,6 +57,12 @@ impl IfStatement {
    
 }
 
+#[cfg(test)]
+mod test {
+    use crate::types;
+    use types::{
+        BlockStatement::BlockStatement, Literal::Literal, IfStatement::IfStatement, ExpressionType::ExpressionType
+    };
 #[test]
 fn test_create_if_statement() {
     let new_literal = Literal {
@@ -84,6 +87,7 @@ fn test_create_if_statement() {
         consequent: new_consequent_block_statement,
     };
     let string: IfStatement = IfStatement::create_if_statement("if(2){return x}");
-    println!("{:#?}", string);
     assert_eq!(string, test_if_statement);
+}
+
 }

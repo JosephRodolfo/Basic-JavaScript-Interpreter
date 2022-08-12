@@ -14,3 +14,4 @@ pub mod ExpressionType;
 pub mod ReturnStatement;
 pub mod ForStatement;
 pub mod ArrayExpression;
+pub mod UpdateExpression;

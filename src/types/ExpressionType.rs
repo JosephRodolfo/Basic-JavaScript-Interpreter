@@ -1,8 +1,6 @@
 use crate::types;
 use crate::traits::ExpressionTypes::ExpressionTypes;
-use types::Literal::Literal;
-use types::Identifier::Identifier;
-use types::{ArrayExpression::ArrayExpression};
+use types::{ArrayExpression::ArrayExpression, UpdateExpression::UpdateExpression, Identifier::Identifier, Literal::Literal};
 
 
 use super::{BinaryTree::BinaryExpression, CallExpression::CallExpression};
@@ -13,7 +11,8 @@ pub enum ExpressionType {
     CallExpression(CallExpression),
     Literal(Literal),
     Identifier(Identifier),
-    ArrayExpression(ArrayExpression)
+    ArrayExpression(ArrayExpression),
+    UpdateExpression(UpdateExpression)
 }
 
 impl ExpressionTypes for ExpressionType {}

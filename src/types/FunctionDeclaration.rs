@@ -3,7 +3,6 @@ use substring::Substring;
 use crate::helper_funcs::rem_first_and_last;
 use crate::traits::CommaSeperatedList::CommaSeperatedList;
 use crate::types::BlockStatement::BlockStatement;
-use crate::types::BodyTypes::BodyTypes;
 use crate::types::Identifier::Identifier;
 
 use crate::{
@@ -48,7 +47,7 @@ impl FunctionDeclaration{
         //string of params
         let rest_params = rest.substring(match_params.start() + 1, match_params.end() - 1);
     
-        let params_string_arr = FunctionDeclaration::create_string_vec(rest_params);
+        let params_string_arr = FunctionDeclaration::create_string_vec(rest_params, ",");
         let params_arr = FunctionDeclaration::create_comma_seperated_array(params_string_arr).unwrap();
     
         let new_identifier = Identifier {
@@ -58,8 +57,6 @@ impl FunctionDeclaration{
             name: func_name.to_string(),
         };
         let block_statement_string = rest.substring(match_params.end(), program.len());
-        println!("block statement string: {:?}", rem_first_and_last(block_statement_string));
-
         let new_block_statement = BlockStatement::create_block_statement(block_statement_string);
 
     

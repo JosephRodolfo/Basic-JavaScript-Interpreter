@@ -1,5 +1,3 @@
-use crate::types::BinaryTree::BinaryExpression;
-use crate::types::Identifier::Identifier;
 use crate::{traits::ExpressionTypes::ExpressionTypes, types};
 use regex::Regex;
 use substring::Substring;
@@ -34,6 +32,13 @@ impl ReturnStatement {
     }
 }
 
+#[cfg(test)]
+mod test {
+    use crate::types;
+    use types::{
+        ExpressionType::ExpressionType, Identifier::Identifier, ReturnStatement::ReturnStatement, ExpressionStatement::ExpressionStatement
+    };
+
 
 #[test]
 fn test_create_return_statement_identifier() {
@@ -65,4 +70,5 @@ fn test_create_return_statement_binary_expression(){
     };
     let return_statement: ReturnStatement = ReturnStatement::create_return_statement("return3==2");
     assert_eq!(return_statement, test_return_statement);
+}
 }

@@ -1,6 +1,6 @@
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
-    types, traits::CommaSeperatedList::CommaSeperatedList,
+    types
 };
 use regex::Regex;
 use substring::Substring;
@@ -122,7 +122,12 @@ impl CallExpression {
 // impl CommaSeperatedList for CallExpression{}
 
     
-
+#[cfg(test)]
+mod test {
+    use crate::types;
+    use types::{
+        Literal::Literal, Identifier::Identifier, CallExpression::CallExpression,
+    };
 #[test]
 fn test_create_identifiers_arrays() {
     let test_vec: Vec<Identifier> = vec![
@@ -207,4 +212,5 @@ fn create_literals_vec() {
             .collect(),
     );
     assert_eq!(string, test_vec_literal);
+}
 }

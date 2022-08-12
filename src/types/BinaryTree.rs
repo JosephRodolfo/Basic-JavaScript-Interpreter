@@ -212,6 +212,14 @@ impl BinaryExpression {
     }
 }
 
+#[cfg(test)]
+mod test {
+    use crate::types;
+    use types::{
+        Literal::Literal, Identifier::Identifier, BinaryTree::BinaryExpression, BinaryTree::BinaryExpressionOptions
+    };
+
+
 #[test]
 fn test_create_binary_tree_three_items_parentheses_last() {
     let new_identifier = Identifier {
@@ -245,8 +253,6 @@ fn test_create_binary_tree_three_items_parentheses_last() {
         right: BinaryExpressionOptions::BinaryExpression(Box::new(new_binary_expression)),
         operator: "+".to_string(),
     };
-    // let printed = BinaryExpression::create_binary_tree("x+(x+3)");
-    // println!("{:#?}", printed);
     assert_eq!(
         binary_expression_test,
         BinaryExpression::create_generic_expression("x+(x+3)")
@@ -526,4 +532,6 @@ fn test_loops_through_operator_parens_beginning() {
 fn test_loops_through_operators_parens_string() {
     let string = BinaryExpression::loop_through_operators("(x+2)");
     assert_eq!(string, ("x+2", None, ""));
+}
+
 }
