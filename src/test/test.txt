@@ -1,4 +1,7 @@
-let x = 2;
+for(leti=2;i<10;i++){
+}
 
-const y = "test";
-var z = [3,3,3];
+function testFunc(){
+
+}
+letx=2;

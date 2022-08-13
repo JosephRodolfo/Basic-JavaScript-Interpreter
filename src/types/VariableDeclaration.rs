@@ -1,12 +1,12 @@
-use regex::Regex;
-use substring::Substring;
-use types::ArrayExpression::ArrayExpression;
-use types::Literal::Literal;
-use types::VariableInitTypes::VariableInitTypes;
-
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type_inc_parentheses},
-    types, Identifier,
+    types,
+};
+use regex::Regex;
+use substring::Substring;
+use types::{
+    ArrayExpression::ArrayExpression, Identifier::Identifier, Literal::Literal,
+    VariableInitTypes::VariableInitTypes,
 };
 
 #[derive(Debug, Clone, PartialEq)]

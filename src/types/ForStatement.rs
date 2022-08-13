@@ -1,6 +1,7 @@
 use crate::{
+    helper_funcs::rem_first_and_last,
     traits::{self, ExpressionTypes::ExpressionTypes},
-    types, helper_funcs::rem_first_and_last,
+    types,
 };
 use regex::Regex;
 use substring::Substring;
@@ -21,7 +22,8 @@ pub struct ForStatement {
 }
 
 impl ForStatement {
-    fn create_for_statement(string: &str) -> ForStatement {
+   pub fn create_for_statement(string: &str) -> ForStatement {
+    println!("{}", string);
         let call_expression_regex = "(\\(.*\\))";
         let match_for_statement_args = Regex::new(&call_expression_regex)
             .unwrap()

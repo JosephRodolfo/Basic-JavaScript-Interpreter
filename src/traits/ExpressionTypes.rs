@@ -24,7 +24,7 @@ pub trait ExpressionTypes {
         if match_end_match {
             return Err("unrecognized_expression");
         }
-        let array_expression_regex = "^\\[.*\\]$";
+        let array_expression_regex =  "^\\[.*\\]$";
         let match_array_expression = Regex::new(&array_expression_regex)
             .unwrap()
             .is_match(string);

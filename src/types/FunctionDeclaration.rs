@@ -1,6 +1,5 @@
 use regex::Regex;
 use substring::Substring;
-use crate::helper_funcs::rem_first_and_last;
 use crate::traits::CommaSeperatedList::CommaSeperatedList;
 use crate::types::BlockStatement::BlockStatement;
 use crate::types::Identifier::Identifier;

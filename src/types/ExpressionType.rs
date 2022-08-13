@@ -15,4 +15,8 @@ pub enum ExpressionType {
     UpdateExpression(UpdateExpression)
 }
 
+impl ExpressionType {
+    
+}
+
 impl ExpressionTypes for ExpressionType {}

@@ -1,10 +1,10 @@
 mod helper_funcs;
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
 mod traits;
+mod interpreter;
 mod types;
 use types::{
-    ExpressionStatement::ExpressionStatement, FunctionDeclaration::FunctionDeclaration,
-    Identifier::Identifier, Program::Program, VariableDeclaration::VariableDeclaration,
+    Program::Program
 };
 
 fn main() {

@@ -1,10 +1,9 @@
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
-    types, Identifier,
-};
+    types};
 use regex::Regex;
 use substring::Substring;
-use types::Literal::Literal;
+use types::{Literal::Literal, Identifier::Identifier};
 
 #[derive(PartialEq, Debug, Clone)]
 enum BinaryExpressionOptions {

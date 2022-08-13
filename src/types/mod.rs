@@ -15,3 +15,4 @@ pub mod ReturnStatement;
 pub mod ForStatement;
 pub mod ArrayExpression;
 pub mod UpdateExpression;
+pub mod MemberExpression;

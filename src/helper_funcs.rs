@@ -55,44 +55,79 @@ pub fn rem_first_and_last(value: &str) -> &str {
     chars.next_back();
     chars.as_str()
 }
-//takes program string, converts it to array of statements. It skips what's inside blocks
-//that functinoality will be moved out to be used when parsing blocks;
-//I know the way I did it with chars causes issues I will need to address later, but I don't think they'll be a problem given the limited scope of this project.
-pub fn string_array_to_vec(string: String) -> Vec<String> {
-    let trimmed = skip_space(&string);
-    let mut new_string = trimmed.to_string();
 
+//find outside brackets/parentheses; 
+//I will further abstrct this to make it more reusable since right now it's mutating and returning a string rather than an index or something like that
+
+pub fn find_outside_brackets(char_left: char, char_right: char, string: &str) -> String {
     let mut count: (i32, bool) = (0, false);
+    let mut new_string = string.to_string();
 
-    let left_curly: &str = "{";
-    let right_curly: &str = "}";
-
-    let left_curly_char = left_curly.chars().next().unwrap();
-    let right_curly_char = right_curly.chars().next().unwrap();
-    let mut semicolon_matches_vec: Vec<usize> = Vec::new();
-
-    for (i, c) in trimmed.chars().enumerate() {
-        if c == left_curly_char {
-            count.0 = count.0 + 1;
+    for (i, c) in string.chars().enumerate() {
+        if c == char_left {
+            count.0 += 1;
             count.1 = true;
         }
-        if c == right_curly_char {
-            count.0 = count.0 - 1;
+        if c == char_right {
+            count.0 -= 1;
         }
 
         if count.0 == 0 {
             count.1 = false;
         }
 
-        if count.1 && c == ";".chars().next().unwrap() {
+        if count.1 && c == ';' {
             new_string.replace_range(i..i + 1, "~");
-            semicolon_matches_vec.push(i);
         }
     }
-    let result: Vec<String> = new_string
+    new_string
+}
+//adds a semicolon for purposes of parsing at the end of block statements,
+//javascript doesn't require semicolons after block statements so I wanted to emulate that. 
+//"offset" increases which each hit to account for increasing string length
+//as semicolons are added.
+pub fn find_ending_bracket_no_semicolon_needed(string: &str) -> String {
+    let mut count: (i32, bool) = (0, false);
+    let mut new_string = string.to_string();
+    let mut offset = 0;
+
+    let left_curly_char = '{';
+    let right_curly_char = '}';
+    for (i, c) in string.chars().enumerate() {
+        if c == left_curly_char {
+            count.0 += 1;
+            count.1 = true;
+        }
+        if c == right_curly_char {
+            count.0 -= 1;
+        }
+
+        if count.0 == 0 {
+            count.1 = false;
+        }
+
+        if !count.1 && c == '}' {
+            offset += 1;
+            new_string.insert_str(i + offset, ";");
+        }
+    }
+    new_string
+}
+
+//takes program string, converts it to array of statements. It skips what's inside blocks
+//that functinoality will be moved out to be used when parsing blocks;
+//I know the way I did it with chars causes issues I will need to address later, but I don't think they'll be a problem given the limited scope of this project.
+pub fn string_array_to_vec(string: String) -> Vec<String> {
+    let trimmed = skip_space(&string);
+    let rem = find_ending_bracket_no_semicolon_needed(&trimmed);
+    let first = find_outside_brackets('{', '}', &rem);
+    let second = find_outside_brackets('(', ')', &first);
+
+    let result: Vec<String> = second
         .split(";")
         .map(|e| e.replace("~", ";").to_string())
         .collect();
+    println!("{:?}", result);
 
     result
 }

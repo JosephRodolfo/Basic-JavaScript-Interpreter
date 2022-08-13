@@ -2,9 +2,11 @@ use crate::traits::ExpressionTypes::ExpressionTypes;
 use crate::types;
 use regex::Regex;
 use substring::Substring;
-use types::{BodyTypes::BodyTypes, IfStatement::IfStatement, ReturnStatement::ReturnStatement};
-
-use crate::{ExpressionStatement, FunctionDeclaration, VariableDeclaration};
+use types::{
+    BodyTypes::BodyTypes, ExpressionStatement::ExpressionStatement, ForStatement::ForStatement,
+    FunctionDeclaration::FunctionDeclaration, IfStatement::IfStatement,
+    ReturnStatement::ReturnStatement, VariableDeclaration::VariableDeclaration,
+};
 
 #[derive(Debug)]
 pub struct Program {
@@ -87,6 +89,8 @@ impl Program {
 
             None
         } else if string_for_match == "for" {
+            let new_for_statement = ForStatement::create_for_statement(program);
+            self.self_add_body_types(BodyTypes::ForStatement(new_for_statement));
             None
         } else if string_for_match == "while" {
             None
