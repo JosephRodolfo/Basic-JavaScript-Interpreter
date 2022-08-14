@@ -28,7 +28,7 @@ impl BinaryExpression {
     //being changed in a loop/if statement that returns something else is bad.
     fn loop_through_operators(string: &str) -> (&str, Option<&str>, &str) {
         //finds operator
-        let mat = Regex::new("([<>]=?|=+|-|\\*|%|==|===|\\+|\\?|:)")
+        let mat = Regex::new("([<>]=?|-|\\*|%|==|===|\\+|\\?|:)")
             .unwrap()
             .find(string);
         //gets ( as char, and first char of string

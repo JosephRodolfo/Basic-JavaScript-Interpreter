@@ -3,8 +3,9 @@ use crate::types;
 use types::ArrayExpression::ArrayExpression;
 use types::{
     BinaryTree::BinaryExpression, CallExpression::CallExpression, ExpressionType::ExpressionType,
-    Identifier::Identifier, Literal::Literal, UpdateExpression::UpdateExpression,
+    Identifier::Identifier, Literal::Literal, UpdateExpression::UpdateExpression, AssignmentExpression::AssignmentExpression
 };
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExpressionStatement {
     type_of: String,
@@ -35,6 +36,9 @@ impl ExpressionStatement {
             Ok("array_expression") => ExpressionType::ArrayExpression(
                 ArrayExpression::create_array_expression(expression_string),
             ),
+            // Ok("assignment_expression") => ExpressionType::AssignmentExpression(
+            //     AssignmentExpression::create_assignment_expression(expression_string),
+            // ),
             Ok("literal") => {
                 let new_literal = Literal {
                     type_of: "Literal".to_string(),

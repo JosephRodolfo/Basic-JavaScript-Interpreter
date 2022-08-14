@@ -16,3 +16,4 @@ pub mod ForStatement;
 pub mod ArrayExpression;
 pub mod UpdateExpression;
 pub mod MemberExpression;
+pub mod AssignmentExpression;

@@ -19,6 +19,14 @@ pub trait ExpressionTypes {
         if mat {
             return Err("unrecognized_expression");
         }
+
+        let assignment_match = Regex::new("^[^=]*(=|\\+=|-=)[^=]*$")
+            .unwrap()
+            .is_match(string);
+        if assignment_match {
+            return Ok("assignment_expression");
+
+        }
         let match_end = format!("{}$", operators);
         let match_end_match = Regex::new(&match_end).unwrap().is_match(&string);
         if match_end_match {
@@ -89,5 +97,20 @@ mod test {
     fn test_update_expression_not_prefix() {
         let array = ExpressionType::check_expression_type("--a");
         assert_eq!(array.unwrap(), "update_expression");
+    }
+    #[test]
+    fn test_assignment_plus_equal() {
+        let array = ExpressionType::check_expression_type("a+=8");
+        assert_eq!(array.unwrap(), "assignment_expression");
+    }
+    #[test]
+    fn test_assignment_minus_equal() {
+        let array = ExpressionType::check_expression_type("a-=8");
+        assert_eq!(array.unwrap(), "assignment_expression");
+    }
+    #[test]
+    fn test_assignment_equal() {
+        let array = ExpressionType::check_expression_type("a=8");
+        assert_eq!(array.unwrap(), "assignment_expression");
     }
 }
