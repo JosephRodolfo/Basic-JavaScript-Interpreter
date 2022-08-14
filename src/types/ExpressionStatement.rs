@@ -10,7 +10,7 @@ pub struct ExpressionStatement {
     type_of: String,
     start: usize,
     end: usize,
-    expression: ExpressionType,
+    pub expression: ExpressionType,
 }
 
 impl ExpressionStatement {

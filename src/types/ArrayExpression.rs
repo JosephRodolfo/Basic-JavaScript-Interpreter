@@ -1,6 +1,8 @@
 use crate::traits::CommaSeperatedList::CommaSeperatedList;
 use crate::{traits::ExpressionTypes::ExpressionTypes, types};
 use types::{ExpressionStatement::ExpressionStatement, ExpressionType::ExpressionType};
+use crate::traits;
+use traits::{evaluator::evaluator};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayExpression {
@@ -27,6 +29,7 @@ impl ArrayExpression {
         };
         new_array_expression
     }
+ 
 }
 
 impl CommaSeperatedList<ExpressionType> for ArrayExpression {
@@ -41,6 +44,21 @@ impl CommaSeperatedList<ExpressionType> for ArrayExpression {
         Ok(result)
     }
 }
+
+
+// impl evaluator for ArrayExpression {
+
+
+
+
+
+
+
+
+// }
+
+
+
 #[cfg(test)]
 mod test {
     use crate::types;
@@ -88,3 +106,7 @@ mod test {
         assert_eq!(array, test_array);
     }
 }
+
+
+
+

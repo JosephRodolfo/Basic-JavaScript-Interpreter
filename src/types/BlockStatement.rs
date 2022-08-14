@@ -2,7 +2,7 @@ use crate::helper_funcs::rem_first_and_last;
 use crate::{helper_funcs::string_array_to_vec, types};
 use types::BodyTypes::BodyTypes;
 use types::Program::Program;
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct BlockStatement {
     pub type_of: String,
     pub start: usize,

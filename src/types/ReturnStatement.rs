@@ -3,7 +3,7 @@ use regex::Regex;
 use substring::Substring;
 use types::ExpressionType::ExpressionType;
 use types::ExpressionStatement::ExpressionStatement;
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ReturnStatement {
     type_of: String,
     start: usize,

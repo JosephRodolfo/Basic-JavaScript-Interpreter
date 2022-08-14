@@ -1,10 +1,15 @@
 mod helper_funcs;
+
+use std::collections::HashMap;
+
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
 mod traits;
-mod interpreter;
+mod interpreter_types;
+use interpreter_types::{Interpreter::Interpreter, Vars::Vars};
+
 mod types;
 use types::{
-    Program::Program
+    Program::Program, VariableInitTypes::VariableInitTypes, VariableDeclaration::VariableDeclaration
 };
 
 fn main() {
@@ -18,5 +23,10 @@ fn main() {
     };
 
     program.loop_to_parse_program(file_vec);
-    println!("{:#?}", program)
+    let hash_stack = HashMap::new();
+    let hash_heap:  HashMap<String, Vars> = HashMap::new();
+    let pointers: HashMap<String, Vars> = HashMap::new();
+
+    Interpreter::loop_through_body_types(program, hash_stack, hash_heap, pointers);
+    // println!("{:#?}", )
 }

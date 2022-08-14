@@ -177,23 +177,7 @@ impl BinaryExpression {
         };
         result
     }
-    //checks for parentheses in first character, if not returns false, else true;
-    // fn check_for_parens(string: &str) -> bool {
-    //     let left_paren = "(".chars().next().unwrap();
-    //     let c = string.chars().next();
 
-    //     let result = match c {
-    //         Some(c) => {
-    //             if c == left_paren {
-    //                 true
-    //             } else {
-    //                 false
-    //             }
-    //         }
-    //         None => false,
-    //     };
-    //     result
-    // }
 
     fn str_to_type_inc_parentheses(string: &str) -> &str {
         let result = str_to_type(string);

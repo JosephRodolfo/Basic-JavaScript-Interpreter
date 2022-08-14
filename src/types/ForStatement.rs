@@ -10,7 +10,7 @@ use types::{
     BlockStatement::BlockStatement, ExpressionStatement::ExpressionStatement,
     ExpressionType::ExpressionType, VariableDeclaration::VariableDeclaration,
 };
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ForStatement {
     type_of: String,
     start: usize,
@@ -23,7 +23,6 @@ pub struct ForStatement {
 
 impl ForStatement {
    pub fn create_for_statement(string: &str) -> ForStatement {
-    println!("{}", string);
         let call_expression_regex = "(\\(.*\\))";
         let match_for_statement_args = Regex::new(&call_expression_regex)
             .unwrap()
@@ -99,7 +98,6 @@ mod test {
             );
 
         let body = BlockStatement::create_block_statement("{vec+=3}");
-        println!("body: {:?}", body);
         let test_for_statement = ForStatement {
             type_of: "ForStatement".to_string(),
             start: 0,

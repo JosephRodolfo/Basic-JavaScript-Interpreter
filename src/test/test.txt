@@ -1,7 +1,3 @@
-for(leti=2;i<10;i++){
-}
 
-function testFunc(){
-
-}
 letx=2;
+constx=x;

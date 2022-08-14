@@ -11,7 +11,7 @@ use crate::{
 
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FunctionDeclaration {
     type_of: String,
     start: usize,

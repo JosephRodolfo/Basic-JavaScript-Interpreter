@@ -127,8 +127,6 @@ pub fn string_array_to_vec(string: String) -> Vec<String> {
         .split(";")
         .map(|e| e.replace("~", ";").to_string())
         .collect();
-    println!("{:?}", result);
-
     result
 }
 

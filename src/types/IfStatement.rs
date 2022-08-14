@@ -7,7 +7,7 @@ use substring::Substring;
 use types::ExpressionStatement::ExpressionStatement;
 use types::BlockStatement::BlockStatement;
 use types::ExpressionType::ExpressionType;
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct IfStatement {
     type_of: String,
     start: usize,
