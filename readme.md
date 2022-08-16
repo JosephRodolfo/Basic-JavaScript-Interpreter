@@ -1,5 +1,7 @@
 # A Limited Javascript Interpreter in Rust
 
-This is a learning project to do attempt to build a very limited JavaScript interpreter in Rust, with a main goal of getting more comfortable with Rust as I go, refactoring as I learn more, and learning how to stop fighting the borrow checker. At the moment it needs a LOT of organization and probably much more planning in how I approach it. I'd also tended to avoid regex in the past so I've already learnt a lot about that doing this project. 
+This is a project to build a limited JavaScript interpreter in Rust, with a main goal of getting more comfortable with Rust as I go, refactoring as I learn more. I'm getting much more familiar with traits, generics, lifetimes, enums, and other Rust features that I'm finding also translate conceptually over to TypeScript as well. Eventually it will interact with a web app TypeScript React frontend that will display a parsed abstract syntax tree as well as actually run the JavaScript code users write.
 
-I also hope to/have learned a lot about JavaScript compiling/interpreting, just in time, and abstract syntax trees, parsing, and lexing and how JavaScript works under the hood in general. 
+At present, parsing for the abstract syntax tree is mostly complete for a simple set of javascript features, and I am currently working on the interpreter part to actually run the code. 
+
+In this project I hope to/have learned a lot about JavaScript compiling/interpreting, program organization, just in time, data structures like binary expression trees and abstract syntax trees, the stack and heap, parsing, and lexing and how JavaScript and programming languages in general work under the hood. As one of my largest scale projects to date, I've also really come to appreciate the critical importance of testing for the first time as something other than an afterthought.  

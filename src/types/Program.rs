@@ -47,6 +47,8 @@ impl Program {
             let parsed_expression_statement: ExpressionStatement = match result {
                 "call_expression" => ExpressionStatement::create_call_expression(program),
                 "update_expression" => ExpressionStatement::create_update_expression(program),
+                "assignment_expression"=>ExpressionStatement::create_assignment_expression(program),
+
                 _ => ExpressionStatement::create_binary_expression(program),
             };
             self.self_add_body_types(BodyTypes::ExpressionStatement(parsed_expression_statement));

@@ -1,3 +1,2 @@
-
-letx=2;
-constx=x;
+letx=[1];
+let y =x;

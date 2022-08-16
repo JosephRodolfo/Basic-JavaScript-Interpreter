@@ -9,7 +9,7 @@ use interpreter_types::{Interpreter::Interpreter, Vars::Vars};
 
 mod types;
 use types::{
-    Program::Program, VariableInitTypes::VariableInitTypes, VariableDeclaration::VariableDeclaration
+    Program::Program
 };
 
 fn main() {
@@ -22,11 +22,14 @@ fn main() {
         ..Default::default()
     };
 
+    let new_interpreter = Interpreter::default();
+
+
     program.loop_to_parse_program(file_vec);
-    let hash_stack = HashMap::new();
+    let hash_stack: HashMap<String, Vars> = HashMap::new();
     let hash_heap:  HashMap<String, Vars> = HashMap::new();
     let pointers: HashMap<String, Vars> = HashMap::new();
 
-    Interpreter::loop_through_body_types(program, hash_stack, hash_heap, pointers);
-    // println!("{:#?}", )
+    new_interpreter.loop_through_body_types(program);
+    // println!("{:#?}", program)
 }

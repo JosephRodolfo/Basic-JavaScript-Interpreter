@@ -52,7 +52,7 @@ impl VariableDeclaration {
         let value = program.substring(after_equal.end(), program.len());
         //returns str of type of var ("number", "bool", etc., takes value as param(or what's after assignment operator))
         let type_of_var = str_to_type_inc_parentheses(value);
-        println!("type: {}, value:{}", type_of_var, value);
+        // println!("type: {}, value:{}", type_of_var, value);
         let variable_init_value: Result<VariableInitTypes, String> = match type_of_var {
             "identifier" => {
                 let new_var_declaration_identifier = Identifier {
@@ -116,9 +116,12 @@ impl VariableDeclaration {
     ) -> Result<(String, Vars), String> {
         let name = var.declarations.id.name;
 
-        if scope_heap.contains_key(&name) | scope_stack.contains_key(&name) | scope_pointers.contains_key(&name) {
+        if scope_heap.contains_key(&name)
+            | scope_stack.contains_key(&name)
+            | scope_pointers.contains_key(&name)
+        {
             let error_message = format!("Error, {} is already declared as a variable!", name);
-            return Err(error_message)
+            return Err(error_message);
         }
         let result = match var.declarations.init {
             VariableInitTypes::Literal(value) => {
@@ -133,7 +136,7 @@ impl VariableDeclaration {
 
             VariableInitTypes::Identifier(value) => {
                 let hash_value = value.evaluate().to_owned();
-                println!("name: {}, hash_value: {}", name, hash_value);
+                // println!("name: {}, hash_value: {}", name, hash_value);
 
                 let value = if scope_heap.contains_key(&hash_value) {
                     let new_var = Vars {
@@ -145,7 +148,7 @@ impl VariableDeclaration {
                 } else if scope_stack.contains_key(&hash_value) {
                     let result = scope_stack.get_key_value(&hash_value).unwrap();
                     let prim_value = result.1.value.clone();
-                    println!("result: {:?}", result);
+                    // println!("result: {:?}", result);
 
                     let new_var = Vars {
                         kind: var.kind,
@@ -154,7 +157,7 @@ impl VariableDeclaration {
 
                     Ok(new_var)
                 } else {
-                    let error_message = format!("{} is undefined", name);
+                    let error_message = format!("{} is undefined", hash_value);
                     Err(error_message)
                 };
 
@@ -173,10 +176,83 @@ impl VariableDeclaration {
     }
 }
 
-//
+#[cfg(test)]
+mod test {
+    use crate::interpreter_types;
+    use crate::types;
+    use interpreter_types::{Interpreter::Interpreter, Vars::Vars, VarsEnum::VarsEnum};
+    use types::{
+        ArrayExpression::ArrayExpression, VariableDeclaration::VariableDeclaration,
+        VariableInitTypes::VariableInitTypes,
+    };
 
-//stack needs key, value
-//heap needs address to which stack can point and VariableInitTypes
-//this function in variable declaration needs to create key value pairs for primitive values
-//key address pairs for identifiers/or convert to key value if primitive
-//or return variable init types if it's declaring a new obj
+    #[test]
+    fn test_create_interpreter_var_literal() {
+        let new_interpreter = Interpreter::default();
+        let new_var =
+            VariableDeclaration::create_variable_declaration("letx=2".to_string(), &"".to_string());
+
+        let interpreted_test_var = VariableDeclaration::create_interpreter_var(
+            new_var,
+            &new_interpreter.hash_stack,
+            &new_interpreter.hash_heap,
+            &new_interpreter.pointers,
+        );
+
+        let var = Vars {
+            kind: "let".to_string(),
+            value: VarsEnum::Prim("2".to_string()),
+        };
+        let test_var = ("x".to_string(), var);
+        assert_eq!(interpreted_test_var.unwrap(), test_var);
+    }
+    #[test]
+
+    fn test_create_interpreter_var_redeclared_error() {
+        let mut new_interpreter = Interpreter::default();
+        let var = Vars {
+            kind: "let".to_string(),
+            value: VarsEnum::Prim("2".to_string()),
+        };
+        new_interpreter.hash_stack.insert("y".to_string(), var);
+
+        let new_var =
+            VariableDeclaration::create_variable_declaration("lety=1".to_string(), &"".to_string());
+
+        let interpreted_test_var = VariableDeclaration::create_interpreter_var(
+            new_var,
+            &new_interpreter.hash_stack,
+            &new_interpreter.hash_heap,
+            &new_interpreter.pointers,
+        );
+
+        assert!(interpreted_test_var.is_err())
+    }
+    #[test]
+
+    fn test_create_interpreter_var_array_obj_type() {
+        let new_interpreter = Interpreter::default();
+        let new_array_expression = ArrayExpression::create_array_expression("1,2,3");
+
+        let var = Vars {
+            kind: "let".to_string(),
+            value: VarsEnum::Obj(VariableInitTypes::ArrayExpression(new_array_expression)),
+        };
+
+        let test_interpreted_expression = ("a".to_string(), var);
+        let new_var = VariableDeclaration::create_variable_declaration(
+            "leta=[1,2,3]".to_string(),
+            &"".to_string(),
+        );
+
+        let interpreted_test_var = VariableDeclaration::create_interpreter_var(
+            new_var,
+            &new_interpreter.hash_stack,
+            &new_interpreter.hash_heap,
+            &new_interpreter.pointers,
+        );
+
+        assert_eq!(interpreted_test_var.unwrap(), test_interpreted_expression);
+    }
+   
+}

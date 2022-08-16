@@ -1,55 +1,82 @@
-use std::collections::HashMap;
-use std::hash::Hash;
-use crate::traits::{evaluator::evaluator};
-use crate::types;
+#![warn(clippy::pedantic)]
 use crate::interpreter_types;
+use crate::types;
 use interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
-use types::{VariableInitTypes::VariableInitTypes, ExpressionStatement::ExpressionStatement, VariableDeclaration::VariableDeclaration, Program::Program, BodyTypes::BodyTypes};
+use std::collections::HashMap;
+use types::{
+    BodyTypes::BodyTypes, ExpressionStatement::ExpressionStatement, Program::Program,
+    VariableDeclaration::VariableDeclaration,
+};
+#[derive(Debug)]
 pub struct Interpreter {
-    stack: HashMap<String, String>,
-
+    pub hash_stack: HashMap<String, Vars>,
+    pub hash_heap: HashMap<String, Vars>,
+    pub pointers: HashMap<String, Vars>,
 }
 
-
 impl Interpreter {
-  pub  fn loop_through_body_types(program: Program,  mut scope_stack_vars: HashMap<String, Vars>, mut scope_heap_vars: HashMap<String, Vars>, mut scope_pointers: HashMap<String, Vars>){
-    for i in 0..program.body.len(){
+    pub fn loop_through_body_types(mut self, program: Program) {
+        for i in 0..program.body.len() {
+            let result = match &program.body[i] {
+                BodyTypes::VariableDeclaration(value) => {
+                    let result = VariableDeclaration::create_interpreter_var(
+                        value.clone(),
+                        &self.hash_stack,
+                        &self.hash_heap,
+                        &self.pointers,
+                    );
+                    let expression_result = match result {
+                        Ok(result) => result,
+                        Err(e) => panic!("{}", e),
+                    };
 
-        let result =    match &program.body[i]{
+                    expression_result
+                }
+                BodyTypes::ExpressionStatement(value) => {
+                    let result = ExpressionStatement::create_evaulator_expression(
+                        value.clone(),
+                        &self.hash_stack,
+                        &self.hash_heap,
+                        &self.pointers,
+                    );
+                    let expression_result = match result {
+                        Ok(result) => result,
+                        Err(e) => panic!("{}", e),
+                    };
 
-
-                BodyTypes::VariableDeclaration(value)=>{
-                    
-                let result =    VariableDeclaration::create_interpreter_var(value.clone(), &scope_stack_vars, &scope_heap_vars, &scope_pointers);
-                    let new_var = result.unwrap();
-                    let key = new_var.0;
-                    let value = new_var.1.clone();
-                   match new_var.1.value {
-                        VarsEnum::Prim(_prim_value)=>{
-                            scope_stack_vars.insert(key, value);
-                        },
-                        VarsEnum::Obj(_obj_value)=>{
-                            scope_heap_vars.insert(key, value);
-                        },
-                        VarsEnum::Pointer(_pointer_value)=>{
-                            scope_pointers.insert(key, value);
-
-                        }
-                    }
-
-                },
-                BodyTypes::ExpressionStatement(value)=>{
-
-
-
-                },
-                _=>{}
-
-
+                    expression_result
+                }
+                _ => {todo!()}
             };
-
+            self.insert_to_memory(result);
         }
-println!("{:?}", scope_stack_vars);
-    
+        println!("{:#?}", self);
+    }
+
+    fn insert_to_memory(&mut self, mem_tuple: (String, Vars)) {
+        let key = mem_tuple.0;
+        let value = mem_tuple.1.clone();
+        match mem_tuple.1.value {
+            VarsEnum::Prim(_prim_value) => {
+                self.hash_stack.insert(key, value);
+            }
+            VarsEnum::Obj(_obj_value) => {
+                self.hash_heap.insert(key, value);
+            }
+            VarsEnum::Pointer(_pointer_value) => {
+                self.pointers.insert(key, value);
+            }
+        }
+    }
+
+    pub fn default() -> Interpreter {
+        let hash_stack: HashMap<String, Vars> = HashMap::new();
+        let hash_heap: HashMap<String, Vars> = HashMap::new();
+        let pointers: HashMap<String, Vars> = HashMap::new();
+        Interpreter {
+            hash_stack,
+            hash_heap,
+            pointers,
+        }
     }
 }
