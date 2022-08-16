@@ -1,2 +1,1 @@
-letx=[1];
-let y =x;
+letx=1+2;

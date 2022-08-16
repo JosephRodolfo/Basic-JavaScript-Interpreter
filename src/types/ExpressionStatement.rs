@@ -7,7 +7,7 @@ use types::{
     ArrayExpression::ArrayExpression, AssignmentExpression::AssignmentExpression,
     BinaryTree::BinaryExpression, CallExpression::CallExpression, ExpressionType::ExpressionType,
     Identifier::Identifier, Literal::Literal, UpdateExpression::UpdateExpression,
-    VariableDeclaration::VariableDeclaration, VariableInitTypes::VariableInitTypes,
+    VariableInitTypes::VariableInitTypes,
 };
 
 #[derive(Debug, Clone, PartialEq)]

@@ -2,8 +2,11 @@ use crate::{
     helper_funcs::{rem_first_and_last, str_to_type},
     types};
 use regex::Regex;
+use crate::traits;
+use traits::{evaluator::evaluator};
 use substring::Substring;
 use types::{Literal::Literal, Identifier::Identifier};
+
 
 #[derive(PartialEq, Debug, Clone)]
 enum BinaryExpressionOptions {
@@ -192,6 +195,18 @@ impl BinaryExpression {
         // type_match
         // };
         type_match
+    }
+}
+
+impl evaluator for BinaryExpression {
+     fn evaluate(&self)->&str {
+
+
+
+
+
+
+        unimplemented!()
     }
 }
 

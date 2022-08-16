@@ -170,6 +170,13 @@ impl VariableDeclaration {
                 };
 
                 Ok((name, new_var))
+            },
+            VariableInitTypes::BinaryExpression(value)=>{
+                let new_var = Vars {
+                    kind: var.kind,
+                    value:VarsEnum::Obj(VariableInitTypes::BinaryExpression(value))
+                };
+                Ok((name, new_var))
             }
         };
         result

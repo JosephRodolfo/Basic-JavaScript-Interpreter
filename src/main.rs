@@ -26,10 +26,7 @@ fn main() {
 
 
     program.loop_to_parse_program(file_vec);
-    let hash_stack: HashMap<String, Vars> = HashMap::new();
-    let hash_heap:  HashMap<String, Vars> = HashMap::new();
-    let pointers: HashMap<String, Vars> = HashMap::new();
+    println!("{:#?}", program);
 
     new_interpreter.loop_through_body_types(program);
-    // println!("{:#?}", program)
 }

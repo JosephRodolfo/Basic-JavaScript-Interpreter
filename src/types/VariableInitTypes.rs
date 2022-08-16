@@ -1,12 +1,15 @@
 use crate::{types};
-use types::{Literal::Literal, Identifier::Identifier, ArrayExpression::ArrayExpression};
+use types::{BinaryTree::BinaryExpression, Literal::Literal, Identifier::Identifier, ArrayExpression::ArrayExpression};
+
+
 
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum VariableInitTypes {
     Identifier(Identifier),
     Literal(Literal),
-    ArrayExpression(ArrayExpression)
+    ArrayExpression(ArrayExpression),
+    BinaryExpression(BinaryExpression)
 }
 
 impl VariableInitTypes {
