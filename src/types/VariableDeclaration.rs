@@ -1,5 +1,5 @@
 use crate::interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
-use crate::traits::evaluator::evaluator;
+use crate::traits::Evaluator::Evaluator;
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type_inc_parentheses},
     types,

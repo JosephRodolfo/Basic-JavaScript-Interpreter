@@ -3,7 +3,7 @@ use crate::{
     types};
 use regex::Regex;
 use crate::traits;
-use traits::{evaluator::evaluator};
+use traits::{Evaluator::Evaluator};
 use substring::Substring;
 use types::{Literal::Literal, Identifier::Identifier};
 
@@ -198,7 +198,7 @@ impl BinaryExpression {
     }
 }
 
-impl evaluator for BinaryExpression {
+impl Evaluator for BinaryExpression {
      fn evaluate(&self)->&str {
 
 

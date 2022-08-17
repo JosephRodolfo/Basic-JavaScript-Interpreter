@@ -2,7 +2,7 @@ use crate::traits::CommaSeperatedList::CommaSeperatedList;
 use crate::{traits::ExpressionTypes::ExpressionTypes, types};
 use types::{ExpressionStatement::ExpressionStatement, ExpressionType::ExpressionType};
 use crate::traits;
-use traits::{evaluator::evaluator};
+use traits::{Evaluator::Evaluator};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayExpression {

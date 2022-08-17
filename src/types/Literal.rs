@@ -1,6 +1,6 @@
 
 use crate::traits;  
-use traits::{evaluator::evaluator};
+use traits::{Evaluator::Evaluator};
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +11,7 @@ pub struct Literal {
     pub value: String,
 }
 
-impl evaluator for Literal {
+impl Evaluator for Literal {
      fn evaluate(&self)-> &str {
         
         &self.value

@@ -1,5 +1,5 @@
 use crate::interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
-use crate::traits::evaluator::evaluator;
+use crate::traits::Evaluator::Evaluator;
 use crate::traits::ExpressionTypes::ExpressionTypes;
 use crate::types;
 use crate::HashMap;
