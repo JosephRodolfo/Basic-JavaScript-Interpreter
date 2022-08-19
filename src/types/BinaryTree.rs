@@ -214,7 +214,7 @@ impl BinaryExpression {
         for i in 0..operator_num_vec.len() {
             let current = operator_num_vec[i];
             let operator_two_left_parens = if operator_stack.len() > 0 {
-                check_top_stack_not_left_paren(&operator_stack)
+                Self::check_top_stack_not_left_paren(&operator_stack)
             } else {
                 false
             };
@@ -226,10 +226,10 @@ impl BinaryExpression {
             if mat {
                 match current {
                     "+" | "-" | "/" | "%" | "^" |"*" => {
-                        let o_one_precedence = check_operator_precedence(current);
+                        let o_one_precedence = Self::check_operator_precedence(current);
                         let o_two_precedence =
                         if operator_stack.len()!=0{
-                            check_operator_precedence(operator_stack[operator_stack.len() - 1])
+                            Self::check_operator_precedence(operator_stack[operator_stack.len() - 1])
                         } else {
                             (0, false)
                         };
@@ -250,13 +250,11 @@ impl BinaryExpression {
                     }
                     ")" => {
                         if !operator_two_left_parens {
-                            println!("{:?}", operator_stack);
                             let popped_op = operator_stack.pop().unwrap();
                             output.push(popped_op);
                         };
-                        if operator_two_left_parens {
                             operator_stack.pop();
-                        }
+                        
                     }
                     _ => {
                         panic!("Error! Current is {}", current);
@@ -266,31 +264,33 @@ impl BinaryExpression {
                 output.push(current);
             }
         }
-
-        fn check_top_stack_not_left_paren(vector: &Vec<&str>) -> bool {
-            let to_check = vector[vector.len() - 1];
-            if to_check == "(" {
-                return true;
-            }
-            false
-        }
-
-        fn check_operator_precedence(string: &str) -> (i8, bool) {
-            let result = match string {
-                "^" => (4, true),
-                "*" => (3, false),
-                "/" => (3, false),
-                "+" => (2, false),
-                "-" => (2, false),
-                _ => {
-                    (0, false)
-                    // panic!("Unrecognized operator! {}", string)
-                }
-            };
-            result
-        }
+        operator_stack.reverse();
         output.append(&mut operator_stack);
         output
+    }
+
+
+    pub fn check_top_stack_not_left_paren(vector: &Vec<&str>) -> bool {
+        let to_check = vector[vector.len() - 1];
+        if to_check == "(" {
+            return true;
+        }
+        false
+    }
+
+    pub fn check_operator_precedence(string: &str) -> (i8, bool) {
+        let result = match string {
+            "^" => (4, false),
+            "*" => (3, true),
+            "/" => (3, true),
+            "+" => (2, true),
+            "-" => (2, true),
+            _ => {
+                (0, true)
+                // panic!("Unrecognized operator! {}", string)
+            }
+        };
+        result
     }
 //this creates a vec with no parsing, one unit per vec item; the title isn't accurate, yet
     pub fn create_shunting_yard_vec(string: &str) -> Vec<&str> {
@@ -301,7 +301,7 @@ impl BinaryExpression {
             return final_vec;
         }
         //finds operator
-        let mat = Regex::new("([<>]=?|-|\\*|%|\\^|==|\\(|\\)|/|===|\\+|\\?|:)")
+        let mat = Regex::new("([<>]=?|-|\\*|%|==|\\^|\\(|\\)|/|===|\\+|\\?|:)")
             .unwrap()
             .find(string);
         println!("mat; {:?}, string {}", mat, string);
@@ -467,6 +467,27 @@ mod test {
 
         assert_eq!(vec!["3", "4", "2", "*", "1", "5", "-", "2",  "3", "^", "^",  "/", "+"], result);
     }
+
+    #[test]
+    fn check_operator_precedence() {
+        let result = BinaryExpression::check_operator_precedence("*");
+
+        assert_eq!((3, true), result);
+    }
+    #[test]
+    fn check_for_left_paren_top_stack() {
+        let result = BinaryExpression::check_top_stack_not_left_paren(&vec![")", "(", "*", ")"]);
+
+        assert_eq!(false, result);
+    }
+    #[test]
+    fn check_for_left_paren_top_stack_true() {
+        let result = BinaryExpression::check_top_stack_not_left_paren(&vec![")", "(", "*", "("]);
+
+        assert_eq!(true, result);
+    }
+
+
 
     #[test]
     fn test_create_pre_shunting_yard_vec() {
