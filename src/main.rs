@@ -3,14 +3,12 @@ mod helper_funcs;
 use std::collections::HashMap;
 
 use helper_funcs::{read_file_line_by_line, string_array_to_vec};
-mod traits;
 mod interpreter_types;
-use interpreter_types::{Interpreter::Interpreter, Vars::Vars};
+mod traits;
+use interpreter_types::{Interpreter::Interpreter};
 
 mod types;
-use types::{
-    Program::Program
-};
+use types::Program::Program;
 
 fn main() {
     let file_string = read_file_line_by_line("src/test/test.txt");
@@ -23,7 +21,6 @@ fn main() {
     };
 
     let new_interpreter = Interpreter::default();
-
 
     program.loop_to_parse_program(file_vec);
     println!("{:#?}", program);

@@ -1,6 +1,6 @@
-use crate::{types};
+use crate::{types, traits};
 use types::{BinaryTree::BinaryExpression, Literal::Literal, Identifier::Identifier, ArrayExpression::ArrayExpression};
-
+use traits::{ExpressionTypes::ExpressionTypes};
 
 
 
@@ -12,10 +12,6 @@ pub enum VariableInitTypes {
     BinaryExpression(BinaryExpression)
 }
 
-impl VariableInitTypes {
-
-
-    
-}
+impl ExpressionTypes for VariableInitTypes {}
 
 

@@ -9,7 +9,7 @@ pub struct ArrayExpression {
     type_of: String,
     start: usize,
     end: usize,
-    elements: Vec<ExpressionType>,
+    pub elements: Vec<ExpressionType>,
 }
 
 impl ArrayExpression {

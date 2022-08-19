@@ -1,16 +1,20 @@
 use crate::interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
 use crate::traits::Evaluator::Evaluator;
+use crate::traits::ExpressionTypes::ExpressionTypes;
 use crate::{
     helper_funcs::{rem_first_and_last, str_to_type_inc_parentheses},
     types,
 };
 use regex::Regex;
 use std::collections::HashMap;
+use std::fmt::Binary;
 use substring::Substring;
 use types::{
     ArrayExpression::ArrayExpression, Identifier::Identifier, Literal::Literal,
     VariableInitTypes::VariableInitTypes,
 };
+
+use super::BinaryTree::BinaryExpression;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
@@ -51,7 +55,7 @@ impl VariableDeclaration {
         //get var value, what follows assignment operator
         let value = program.substring(after_equal.end(), program.len());
         //returns str of type of var ("number", "bool", etc., takes value as param(or what's after assignment operator))
-        let type_of_var = str_to_type_inc_parentheses(value);
+        let type_of_var = VariableInitTypes::check_expression_type(value).unwrap();
         // println!("type: {}, value:{}", type_of_var, value);
         let variable_init_value: Result<VariableInitTypes, String> = match type_of_var {
             "identifier" => {
@@ -80,7 +84,12 @@ impl VariableDeclaration {
                     ArrayExpression::create_array_expression(square_brackets_removed),
                 ))
             }
-            _ => panic!("Problem with variable declaration!"),
+            "binary_expression" => {
+                Ok(VariableInitTypes::BinaryExpression(
+                    BinaryExpression::create_generic_expression(value),
+                ))
+            }
+            _ => panic!("Problem with variable declaration! {}", value),
         };
 
         let new_var_declaration_identifier = Identifier {

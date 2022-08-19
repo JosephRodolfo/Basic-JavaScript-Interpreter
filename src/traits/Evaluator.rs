@@ -1,8 +1,10 @@
 
 
-use crate::helper_funcs::{rem_first_and_last, str_to_type};
+use crate::{helper_funcs::{rem_first_and_last, str_to_type}, interpreter_types::Interpreter::Interpreter};
 
 pub trait Evaluator {
+
+    fn evaluate_with_scope(&self, scope: &Interpreter)->String;
     fn evaluate(&self) -> &str;
 //simple eval takes, left, right, and operator string slices. It determines the correct return type
 //by testing the types of the left and right values, then matches those to correct function;
@@ -25,6 +27,7 @@ pub trait Evaluator {
         let right_number = Self::boolean_to_number(right);
         let number_result = match operator {
             "+" => left_number + right_number,
+            "*" => left_number * right_number,
             "-" => left_number - right_number,
             "/" => left_number / right_number,
             "%" => left_number % right_number,
@@ -113,7 +116,7 @@ pub trait Evaluator {
         let right_type = str_to_type(right).unwrap();
 
         let math_or_not =
-            if (operator == "+") | (operator == "-") | (operator == "/") | (operator == "%") {
+            if (operator == "+") | (operator == "*") | (operator == "-") | (operator == "/") | (operator == "%") {
                 true
             } else {
                 false

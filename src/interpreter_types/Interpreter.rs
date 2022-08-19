@@ -53,6 +53,28 @@ impl Interpreter {
         println!("{:#?}", self);
     }
 
+   pub fn lookup_for_eval(&self, key: &str)->VarsEnum{
+        let result: Result<VarsEnum, String> = if self.hash_heap.contains_key(key){
+             Ok(self.hash_heap.get_key_value(key).unwrap().1.to_owned().value)
+        } else if self.hash_stack.contains_key(key) {
+             Ok(self.hash_stack.get_key_value(key).unwrap().1.to_owned().value)
+
+        } else if self.pointers.contains_key(key) {
+             Ok(self.pointers.get_key_value(key).unwrap().1.to_owned().value)
+
+
+        } else {
+            let error_message = format!("Undefined variabe! {}", key);
+            Err(error_message.to_string())
+        };
+
+        match result {
+            Ok(value)=>{value},
+            Err(e)=>panic!("{}", e)
+        }
+
+    }
+
     fn insert_to_memory(&mut self, mem_tuple: (String, Vars)) {
         let key = mem_tuple.0;
         let value = mem_tuple.1.clone();
