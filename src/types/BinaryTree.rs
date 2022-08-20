@@ -1,6 +1,6 @@
 use core::panic;
 use std::process::Output;
-use std::vec;
+use std::{string, vec};
 
 use crate::traits;
 use crate::{
@@ -218,26 +218,26 @@ impl BinaryExpression {
             } else {
                 false
             };
-   
+
             let mat = Regex::new("([<>]=?|-|\\*|%|==|\\^|\\(|\\)|/|===|\\+|\\?|:)")
                 .unwrap()
                 .is_match(current);
 
             if mat {
                 match current {
-                    "+" | "-" | "/" | "%" | "^" |"*" => {
+                    "+" | "-" | "/" | "%" | "^" | "*" => {
                         let o_one_precedence = Self::check_operator_precedence(current);
-                        let o_two_precedence =
-                        if operator_stack.len()!=0{
-                            Self::check_operator_precedence(operator_stack[operator_stack.len() - 1])
+                        let o_two_precedence = if operator_stack.len() != 0 {
+                            Self::check_operator_precedence(
+                                operator_stack[operator_stack.len() - 1],
+                            )
                         } else {
                             (0, false)
                         };
                         //if top of operator stack is not a left parentheses
                         if !operator_two_left_parens
                             && (o_two_precedence.0 > o_one_precedence.0
-                                || (o_two_precedence.0 == o_one_precedence.0
-                                    && o_one_precedence.1))
+                                || (o_two_precedence.0 == o_one_precedence.0 && o_one_precedence.1))
                         {
                             let popped_op = operator_stack.pop().unwrap();
                             output.push(popped_op);
@@ -253,8 +253,7 @@ impl BinaryExpression {
                             let popped_op = operator_stack.pop().unwrap();
                             output.push(popped_op);
                         };
-                            operator_stack.pop();
-                        
+                        operator_stack.pop();
                     }
                     _ => {
                         panic!("Error! Current is {}", current);
@@ -268,7 +267,6 @@ impl BinaryExpression {
         output.append(&mut operator_stack);
         output
     }
-
 
     pub fn check_top_stack_not_left_paren(vector: &Vec<&str>) -> bool {
         let to_check = vector[vector.len() - 1];
@@ -292,7 +290,7 @@ impl BinaryExpression {
         };
         result
     }
-//this creates a vec with no parsing, one unit per vec item; the title isn't accurate, yet
+    //this creates a vec with no parsing, one unit per vec item; the title isn't accurate, yet
     pub fn create_shunting_yard_vec(string: &str) -> Vec<&str> {
         let mut new_string = string;
 
@@ -304,7 +302,7 @@ impl BinaryExpression {
         let mat = Regex::new("([<>]=?|-|\\*|%|==|\\^|\\(|\\)|/|===|\\+|\\?|:)")
             .unwrap()
             .find(string);
-        println!("mat; {:?}, string {}", mat, string);
+        // println!("mat; {:?}, string {}", mat, string);
         let mat_result = match mat {
             Some(value) => value,
             None => {
@@ -317,26 +315,19 @@ impl BinaryExpression {
             final_vec.push(new_string.substring(mat_result.start(), mat_result.end()));
             new_string = new_string.substring(mat_result.end(), new_string.len())
         } else {
-
-
-
-
             final_vec.push(new_string.substring(0, mat_result.start()));
             final_vec.push(new_string.substring(mat_result.start(), mat_result.end()));
             new_string = new_string.substring(mat_result.end(), new_string.len())
-             
         }
         final_vec.append(&mut Self::create_shunting_yard_vec(new_string));
-    
-          final_vec
+
+        final_vec
     }
 
-    pub fn create_combined_shunted_vec(string: &str)->Vec<&str>{
-
+    pub fn create_combined_shunted_vec(string: &str) -> Vec<&str> {
         let pre_vec = Self::create_shunting_yard_vec(string);
         let parse_vec = Self::create_vec(pre_vec);
         parse_vec
-
     }
 
     pub fn create_binary_expression(string: &str) -> Vec<&str> {
@@ -398,6 +389,101 @@ impl BinaryExpression {
         final_vec.append(&mut Self::create_binary_expression(new_string));
         final_vec
     }
+
+    pub fn create_binary_expression_from_rpn<'a>(
+        string_vec: &mut Vec<&'a str>,
+        saved_stack: &mut Vec<&'a str>,
+    ) -> BinaryExpression {
+        let stack = saved_stack;
+        string_vec.reverse();
+        let mut current = BinaryExpression {
+            type_of: "BinaryExpression".to_string(),
+            start: 0,
+            end: 0,
+            left: BinaryExpressionOptions::None("placeholder".to_string()),
+            operator: "+".to_string(),
+            right: BinaryExpressionOptions::None("placeholder".to_string()),
+        };
+
+        for _i in 0..string_vec.len() {
+            let popped = string_vec.pop().unwrap();
+            let mat = Regex::new("([<>]=?|-|\\*|%|==|\\^|\\(|\\)|/|===|\\+|\\?|:)")
+                .unwrap()
+                .is_match(popped);
+
+            match mat {
+                false => stack.push(popped),
+                true => {
+                    let expression = match stack.len() {
+                        2..=100 => {
+                            let mut result_expression = BinaryExpression {
+                                type_of: "BinaryExpression".to_string(),
+                                start: 0,
+                                end: 0,
+                                left: Self::create_node(stack[stack.len() - 2]),
+                                operator: popped.to_string(),
+                                right: Self::create_node(stack[stack.len() - 1]),
+                            };
+                            stack.pop();
+                            stack.pop();
+
+                            result_expression
+                        }
+                        1 => {
+                            let mut result_expression = BinaryExpression {
+                                type_of: "BinaryExpression".to_string(),
+                                start: 0,
+                                end: 0,
+                                left: BinaryExpressionOptions::BinaryExpression(Box::new(current.clone())),
+                                operator: popped.to_string(),
+                                right: Self::create_node(stack[stack.len() - 1]),
+                            };
+                            stack.pop();
+
+                            result_expression
+                        }
+                        _ => {
+                            todo!()
+                        }
+                    };
+                    current = expression;
+                }
+            }
+        }
+        current
+    }
+
+    pub fn evaluate_rpn(rpn_vec: Vec<&str>) -> BinaryExpression {
+        let mut reversed = rpn_vec;
+        let mut stack: Vec<&str> = Vec::new();
+        reversed.reverse();
+
+        for i in 0..reversed.len() {
+            let mat = Regex::new("([<>]=?|-|\\*|%|==|\\^|\\(|\\)|/|===|\\+|\\?|:)")
+                .unwrap()
+                .is_match(reversed[i]);
+
+            if !mat {
+                let popped = reversed.pop().unwrap();
+                stack.push(popped);
+            } else {
+                match reversed[i] {
+                    "+" => {}
+                    "-" => {}
+                    "/" => {}
+                    "%" => {}
+                    "^" => {}
+                    "*" => {}
+
+                    _ => {
+                        todo!()
+                    }
+                }
+            }
+        }
+
+        unimplemented!()
+    }
 }
 
 impl Evaluator for BinaryExpression {
@@ -454,18 +540,42 @@ impl Evaluator for BinaryExpression {
 
 #[cfg(test)]
 mod test {
-    use crate::{interpreter_types, traits::Evaluator::Evaluator, types};
+    use crate::{
+        interpreter_types,
+        traits::Evaluator::Evaluator,
+        types::{self},
+    };
     use interpreter_types::Interpreter::Interpreter;
     use types::{
         BinaryTree::BinaryExpression, BinaryTree::BinaryExpressionOptions, Identifier::Identifier,
         Literal::Literal,
     };
+    #[test]
+    fn test_create_binary_expression_from_rpn() {
+        let original_binary_expression = BinaryExpression {
+            type_of: "BinaryExpression".to_string(),
+            start: 0,
+            end: 0,
+            left: BinaryExpressionOptions::None("placeholder".to_string()),
+            operator: "+".to_string(),
+            right: BinaryExpressionOptions::None("placeholder".to_string()),
+        };
+        let mut result = BinaryExpression::create_combined_shunted_vec("(3+3)/2");
+        println!("rpn; {:?}", result);
+        let test_binary_expression =
+            BinaryExpression::create_binary_expression_from_rpn(&mut result, &mut vec![]);
+        println!("{:#?}", test_binary_expression);
+        assert_eq!(test_binary_expression, original_binary_expression);
+    }
 
     #[test]
     fn test_create_shunting_yard_vec() {
         let result = BinaryExpression::create_combined_shunted_vec("3+4*2/(1-5)^2^3");
 
-        assert_eq!(vec!["3", "4", "2", "*", "1", "5", "-", "2",  "3", "^", "^",  "/", "+"], result);
+        assert_eq!(
+            vec!["3", "4", "2", "*", "1", "5", "-", "2", "3", "^", "^", "/", "+"],
+            result
+        );
     }
 
     #[test]
@@ -487,13 +597,14 @@ mod test {
         assert_eq!(true, result);
     }
 
-
-
     #[test]
     fn test_create_pre_shunting_yard_vec() {
         let result = BinaryExpression::create_shunting_yard_vec("3+4*2/(1-5)^2^3");
 
-        assert_eq!(vec!["3", "+", "4", "*", "2", "/", "(", "1",  "-", "5", ")",  "^", "2", "^", "3"], result);
+        assert_eq!(
+            vec!["3", "+", "4", "*", "2", "/", "(", "1", "-", "5", ")", "^", "2", "^", "3"],
+            result
+        );
     }
 
     // #[test]
