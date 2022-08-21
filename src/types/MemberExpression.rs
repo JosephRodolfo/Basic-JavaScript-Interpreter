@@ -9,5 +9,7 @@ struct MemberExpression {
 }
 
 impl MemberExpression {
-    fn create_member_expression() {}
+    fn create_member_expression() {
+        unimplemented!();
+    }
 }

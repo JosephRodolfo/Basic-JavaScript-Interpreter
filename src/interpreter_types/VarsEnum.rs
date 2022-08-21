@@ -15,7 +15,6 @@ pub enum VarsEnum {
 
 impl VarsEnum {
     pub fn create_vars_enum(string: &str, scope: &Interpreter) -> VarsEnum {
-        println!("{}", string);
         let type_of = Self::check_expression_type(string).unwrap();
         match type_of {
             "literal" => VarsEnum::Prim(string.to_string()),

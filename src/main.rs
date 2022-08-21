@@ -23,7 +23,7 @@ fn main() {
     let new_interpreter = Interpreter::default();
 
     program.loop_to_parse_program(file_vec);
-    println!("{:#?}", program);
+    // println!("{:#?}", program);
 
     new_interpreter.loop_through_body_types(program);
 }

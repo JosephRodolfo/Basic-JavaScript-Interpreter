@@ -1,4 +1,4 @@
-use crate::interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
+use crate::interpreter_types::{Interpreter::Interpreter, Vars::Vars, VarsEnum::VarsEnum};
 use crate::traits::Evaluator::Evaluator;
 use crate::traits::ExpressionTypes::ExpressionTypes;
 use crate::types;
@@ -34,7 +34,7 @@ impl ExpressionStatement {
                 UpdateExpression::create_update_expression(expression_string),
             ),
             Ok("binary_expression") => ExpressionType::BinaryExpression(
-                BinaryExpression::create_generic_expression(expression_string),
+                BinaryExpression::create_binary_expression(expression_string),
             ),
             Ok("array_expression") => ExpressionType::ArrayExpression(
                 ArrayExpression::create_array_expression(expression_string),
@@ -71,7 +71,7 @@ impl ExpressionStatement {
 
 impl ExpressionStatement {
     pub fn create_binary_expression(string: &str) -> ExpressionStatement {
-        let result = BinaryExpression::create_generic_expression(string);
+        let result = BinaryExpression::create_binary_expression(string);
         let new_expression_statement = ExpressionStatement {
             type_of: "ExpressionStatement".to_string(),
             start: 0,
@@ -119,7 +119,6 @@ impl ExpressionStatement {
         scope_pointers: &HashMap<String, Vars>,
     ) -> Result<(String, Vars), String> {
         let expression_type = value.expression;
-
         let returned_expression = match expression_type {
             ExpressionType::AssignmentExpression(value) => {
                 let operator = value.operator;
@@ -163,14 +162,13 @@ impl ExpressionStatement {
                         };
 
                         Ok(name.to_string())
-                      
                     }
 
                     ExpressionType::BinaryExpression(_) => {
-                        return Err("Assigning to rvalue".to_string())
+                        return Err("Can't assign to a binary expression!".to_string());
                     }
                     ExpressionType::CallExpression(_) => {
-                        return Err("Assigning to rvalue".to_string())
+                        return Err("Call expression error!".to_string())
                     }
                     ExpressionType::Literal(literal) => {
                         let literal_value = literal.value.to_owned();
@@ -185,10 +183,10 @@ impl ExpressionStatement {
                         return Err("Destructuring not currently supported!".to_string())
                     }
                     ExpressionType::UpdateExpression(_) => {
-                        return Err("Assigning to rvalue".to_string())
+                        return Err("Assigning to update value not supported! yet".to_string())
                     }
                     ExpressionType::AssignmentExpression(_) => {
-                        return Err("Assigning to rvalue".to_string())
+                        return Err("Assignment expression assignment not yet supported".to_string())
                     }
                 };
 
@@ -230,8 +228,17 @@ impl ExpressionStatement {
                         Ok(right_result_identifier.unwrap())
                     }
 
-                    ExpressionType::BinaryExpression(_) => {
-                        return Err("Assigning to rvalue".to_string())
+                    ExpressionType::BinaryExpression(binary_expression) => {
+                        let mut new_interpreter = Interpreter::default();
+                        new_interpreter.hash_heap = scope_heap.clone();
+                        new_interpreter.hash_stack = scope_stack.clone();
+                        new_interpreter.pointers = scope_pointers.clone();
+                        let result = binary_expression.evaluate_with_scope(&new_interpreter);
+                        let new_var = Vars {
+                            kind: "let".to_string(),
+                            value: VarsEnum::Prim(result),
+                        };
+                        Ok(new_var)
                     }
                     ExpressionType::CallExpression(_) => {
                         return Err("Assigning to rvalue".to_string())

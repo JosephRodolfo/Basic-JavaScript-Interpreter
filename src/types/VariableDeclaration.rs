@@ -1,20 +1,20 @@
+use crate::interpreter_types::Interpreter::Interpreter;
 use crate::interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
 use crate::traits::Evaluator::Evaluator;
 use crate::traits::ExpressionTypes::ExpressionTypes;
+
 use crate::{
-    helper_funcs::{rem_first_and_last, str_to_type_inc_parentheses},
+    helper_funcs::{rem_first_and_last},
     types,
 };
 use regex::Regex;
 use std::collections::HashMap;
-use std::fmt::Binary;
 use substring::Substring;
 use types::{
     ArrayExpression::ArrayExpression, Identifier::Identifier, Literal::Literal,
-    VariableInitTypes::VariableInitTypes,
+    VariableInitTypes::VariableInitTypes, BinaryTree::BinaryExpression
 };
 
-use super::BinaryTree::BinaryExpression;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
@@ -86,7 +86,7 @@ impl VariableDeclaration {
             }
             "binary_expression" => {
                 Ok(VariableInitTypes::BinaryExpression(
-                    BinaryExpression::create_generic_expression(value),
+                    BinaryExpression::create_binary_expression(value),
                 ))
             }
             _ => panic!("Problem with variable declaration! {}", value),
@@ -181,9 +181,14 @@ impl VariableDeclaration {
                 Ok((name, new_var))
             },
             VariableInitTypes::BinaryExpression(value)=>{
+
+                let mut new_interpreter = Interpreter::default();
+                new_interpreter.hash_heap=scope_heap.clone();
+                new_interpreter.hash_stack=scope_stack.clone();
+                new_interpreter.pointers=scope_pointers.clone();
                 let new_var = Vars {
                     kind: var.kind,
-                    value:VarsEnum::Obj(VariableInitTypes::BinaryExpression(value))
+                    value:VarsEnum::Prim(value.evaluate_with_scope(&new_interpreter))
                 };
                 Ok((name, new_var))
             }

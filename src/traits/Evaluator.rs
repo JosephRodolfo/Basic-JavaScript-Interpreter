@@ -9,6 +9,7 @@ pub trait Evaluator {
 //simple eval takes, left, right, and operator string slices. It determines the correct return type
 //by testing the types of the left and right values, then matches those to correct function;
     fn simple_eval(left: &str, operator: &str, right: &str)->String {
+        println!("left: {}, operator {}, right {}", left, operator, right);
         let operation_type = Self::infer_types(left, operator, right);
 
       let simple_eval_result =  match operation_type {
@@ -31,6 +32,7 @@ pub trait Evaluator {
             "-" => left_number - right_number,
             "/" => left_number / right_number,
             "%" => left_number % right_number,
+            "^" => left_number.powf(right_number),
             _ => {
                 panic!("{} is an incorrect operator!", operator)
             }
@@ -116,7 +118,7 @@ pub trait Evaluator {
         let right_type = str_to_type(right).unwrap();
 
         let math_or_not =
-            if (operator == "+") | (operator == "*") | (operator == "-") | (operator == "/") | (operator == "%") {
+            if (operator == "+") | (operator == "*") | (operator == "-") | (operator == "/") | (operator == "%") | (operator == "^"){
                 true
             } else {
                 false
