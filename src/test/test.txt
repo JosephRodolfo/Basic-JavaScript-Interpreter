@@ -1,2 +1,7 @@
-const x =0;
-x=2+2;
+
+function testFunc(a, b, c){
+    return a + b;
+}
+
+let x = 1;
+testFunc(x, 2, 3);

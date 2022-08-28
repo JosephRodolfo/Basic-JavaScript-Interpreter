@@ -4,7 +4,8 @@ use crate::types;
 use interpreter_types::{Vars::Vars, VarsEnum::VarsEnum};
 use std::collections::HashMap;
 use types::{
-    BodyTypes::BodyTypes, ExpressionStatement::ExpressionStatement, Program::Program,
+    BodyTypes::BodyTypes, ExpressionStatement::ExpressionStatement,
+    FunctionDeclaration::FunctionDeclaration, Program::Program,
     VariableDeclaration::VariableDeclaration,
 };
 #[derive(Debug)]
@@ -46,36 +47,63 @@ impl Interpreter {
 
                     expression_result
                 }
-                _ => {todo!()}
+                BodyTypes::FunctionDeclaration(value) => {
+                    let result = FunctionDeclaration::create_interpreter_var(value);
+                    let function_result = match result {
+                        Ok(result) => result,
+                        Err(e) => panic!("{}", e),
+                    };
+
+                    function_result
+                }
+
+                _ => {
+                    todo!()
+                }
             };
             self.insert_to_memory(result);
         }
-        println!("{:#?}", self);
+        // println!("{:#?}", self);
     }
-
-   pub fn lookup_for_eval(&self, key: &str)->VarsEnum{
-        let result: Result<VarsEnum, String> = if self.hash_heap.contains_key(key){
-             Ok(self.hash_heap.get_key_value(key).unwrap().1.to_owned().value)
+//this should really be called something more like look up for declaration or reassignment
+    pub fn lookup_for_eval(&self, key: &str) -> VarsEnum {
+        let result: Result<VarsEnum, String> = if self.hash_heap.contains_key(key) {
+            let vars = self.hash_heap.get_key_value(key).unwrap().1.to_owned();
+            let const_check = if vars.kind == "const" {
+                Err("consts cannot be reassigned!".to_string())
+            } else {
+                Ok(vars.value)
+            };
+            const_check
         } else if self.hash_stack.contains_key(key) {
-             Ok(self.hash_stack.get_key_value(key).unwrap().1.to_owned().value)
-
+            let vars = self.hash_stack.get_key_value(key).unwrap().1.to_owned();
+            let const_check = if vars.kind == "const" {
+                Err("consts cannot be reassigned!".to_string())
+            } else {
+                Ok(vars.value)
+            };
+            const_check
         } else if self.pointers.contains_key(key) {
-             Ok(self.pointers.get_key_value(key).unwrap().1.to_owned().value)
+            let vars = self.pointers.get_key_value(key).unwrap().1.to_owned();
+            let const_check = if vars.kind == "const" {
+                Err("consts cannot be reassigned!".to_string())
+            } else {
+                Ok(vars.value)
+            };
 
-
+            const_check
         } else {
-            let error_message = format!("Undefined variabe! {}", key);
+            let error_message = format!("Undefined variable! {}", key);
             Err(error_message.to_string())
         };
 
         match result {
-            Ok(value)=>{value},
-            Err(e)=>panic!("{}", e)
+            Ok(value) => value,
+            Err(e) => panic!("{}", e),
         }
-
     }
 
-    fn insert_to_memory(&mut self, mem_tuple: (String, Vars)) {
+    pub fn insert_to_memory(&mut self, mem_tuple: (String, Vars)) {
         let key = mem_tuple.0;
         let value = mem_tuple.1.clone();
         match mem_tuple.1.value {

@@ -36,7 +36,7 @@ pub struct VariableDeclarator {
 impl VariableDeclaration {
     pub fn create_variable_declaration(
         program: String,
-        whole_program: &String,
+        _whole_program: &String,
     ) -> VariableDeclaration {
         let mat = Regex::new("(const|let|var)")
             .unwrap()
@@ -191,7 +191,8 @@ impl VariableDeclaration {
                     value:VarsEnum::Prim(value.evaluate_with_scope(&new_interpreter))
                 };
                 Ok((name, new_var))
-            }
+            },
+            _=>{todo!()}
         };
         result
     }

@@ -9,7 +9,7 @@ use interpreter_types::{Interpreter::Interpreter, VarsEnum::VarsEnum};
 use regex::Regex;
 use substring::Substring;
 use traits::Evaluator::Evaluator;
-use types::{Identifier::Identifier, Literal::Literal, VariableDeclaration::VariableDeclaration};
+use types::{Identifier::Identifier, Literal::Literal};
 
 #[derive(PartialEq, Debug, Clone)]
 enum BinaryExpressionOptions {
@@ -635,6 +635,14 @@ mod test {
         let result = BinaryExpression::create_binary_expression("7+6*2^3+2")
             .evaluate_with_scope(&new_interpreter);
         assert_eq!("57", result);
+    }
+
+    #[test]
+    fn test_evaulate_with_scope_order_operations_nested() {
+        let new_interpreter = Interpreter::default(); //7623^2   // +*+
+        let result = BinaryExpression::create_binary_expression("1+(2+(3*(4/2)))")
+            .evaluate_with_scope(&new_interpreter);
+        assert_eq!("9", result);
     }
 
     #[test]
